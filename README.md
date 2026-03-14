@@ -1,5 +1,9 @@
 # Beta Cursor 全面汉化补丁
 
+[![Release](https://img.shields.io/github/v/release/231771725wang-cpu/beta-cursor-zh-patch?label=Release)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases)
+[![License](https://img.shields.io/github/license/231771725wang-cpu/beta-cursor-zh-patch?label=License)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/blob/main/LICENSE)
+[![Actions](https://img.shields.io/github/actions/workflow/status/231771725wang-cpu/beta-cursor-zh-patch/cross-platform-smoke.yml?label=Smoke%20Test)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/actions/workflows/cross-platform-smoke.yml)
+
 这是一个面向 Cursor Beta 版本的本地汉化补丁仓库，目标是尽量在不改动日常使用方式的前提下，把 Cursor 的核心设置、智能体相关页面和常见界面文案翻译成简体中文。
 
 本仓库只包含补丁脚本、翻译数据和说明，不包含 Cursor 原始安装包或官方资源备份文件。
