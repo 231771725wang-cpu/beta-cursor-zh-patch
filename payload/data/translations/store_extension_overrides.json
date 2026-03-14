@@ -1,0 +1,14 @@
+{
+  "anysphere.cursor-always-local": {
+    "displayName": "Cursor 始终本地",
+    "description": "Cursor 的实验功能集合。"
+  },
+  "anysphere.cursor-retrieval": {
+    "displayName": "AI 补全",
+    "description": "从代码语言模型获取补全建议。"
+  },
+  "anysphere.cursor-shadow-workspace": {
+    "displayName": "Cursor 影子工作区",
+    "description": "管理一个隐藏的本地窗口，供 AI 智能体在向你展示代码前整理和细化代码。"
+  }
+}

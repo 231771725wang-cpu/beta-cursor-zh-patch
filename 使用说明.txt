@@ -1,0 +1,73 @@
+# Beta-Cursor-全面汉化-2.6.19-224838f9
+
+这是一个可在另一台电脑上复现的 Cursor 汉化本地补丁包，包含 macOS 与 Windows 启动器。
+
+## 中文说明
+
+### 安装
+
+- 把整个目录拷到目标电脑，不要只拷单个脚本文件。
+- macOS：推荐先把目录移到 `~/work`、`~/Applications` 或其他非“桌面/下载/文稿”位置，再进入 `macOS/` 运行 `安装.command`，首次成功率更高。
+- Windows：进入 `Windows/`，双击 `Windows/安装.bat`。
+- 如需手动指定 Cursor 路径，可按下面方式运行：
+
+```bash
+./macOS/安装.command /Applications/Cursor.app
+```
+
+```bat
+Windows\安装.bat "C:\Users\<You>\AppData\Local\Programs\Cursor\resources\app"
+```
+
+### 回滚
+
+- macOS：进入 `macOS/`，双击 `macOS/回滚.command`。
+- Windows：进入 `Windows/`，双击 `Windows/回滚.bat`。
+- 回滚会恢复本次安装前备份的原文件，不会重装整个 Cursor。
+
+### 常见问题
+
+- 双击打不开：macOS 请右键后选择“打开”；Windows 请右键“以管理员身份运行”或在终端里执行。
+- macOS 提示“已损坏”或“无法验证开发者”：这通常是 Gatekeeper 对未签名脚本的拦截，并不一定真损坏。先在终端执行 `xattr -dr com.apple.quarantine "<解压后的补丁目录>"`，再重新双击 `macOS/安装.command`。
+- 如果补丁目录位于“桌面/下载/文稿”，macOS 还可能要求给 Terminal 打开对应的“文件与文件夹”开关。把补丁目录移到非受保护目录后再运行，通常更顺。
+- 如果补丁是从浏览器下载到另一台 Mac，这个提示更常见；没有 Apple Developer ID 签名与公证时，通常无法彻底免掉首次放行。
+- 提示没有权限：说明当前账户无权写入 Cursor 安装目录，请使用管理员权限。
+- 只拷了脚本文件：不行，必须保留 `payload/` 目录。
+- 安装时默认启用插件市场动态简介补丁。
+- 运行状态、备份与回滚信息会写入 `payload/artifacts/` 与 `payload/.cursor_zh_state/`。
+
+## English
+
+This bundle is a local Cursor Chinese patch package for another computer. It includes launchers for both macOS and Windows.
+
+### Install
+
+- Copy the entire folder to the target machine. Do not copy only one script file.
+- macOS: for the best first-run success rate, move the bundle to a non-protected folder such as `~/work` or `~/Applications`, then run `macOS/安装.command`.
+- Windows: open the `Windows/` folder and double-click `Windows/安装.bat`.
+- To pass a custom Cursor path, run:
+
+```bash
+./macOS/安装.command /Applications/Cursor.app
+```
+
+```bat
+Windows\安装.bat "C:\Users\<You>\AppData\Local\Programs\Cursor\resources\app"
+```
+
+### Rollback
+
+- macOS: open the `macOS/` folder and double-click `macOS/回滚.command`.
+- Windows: open the `Windows/` folder and double-click `Windows/回滚.bat`.
+- Rollback restores the original files backed up during patching. It does not reinstall Cursor.
+
+### Troubleshooting
+
+- Script does not open: on macOS use Right Click -> Open; on Windows try Run as administrator or execute it in Terminal/Command Prompt.
+- If macOS says the script is damaged or from an unidentified developer, it is usually Gatekeeper blocking an unsigned script rather than real corruption. Run `xattr -dr com.apple.quarantine "<extracted bundle folder>"` in Terminal, then open `macOS/安装.command` again.
+- If the bundle lives under Desktop, Downloads, or Documents, macOS may also ask for Terminal access to that folder. Moving the bundle to a non-protected folder usually avoids this extra prompt.
+- This is more common when the bundle is downloaded through a browser. Without Apple Developer ID signing and notarization, the first-run approval usually cannot be fully avoided.
+- Permission denied: the current account cannot write to the Cursor install directory. Run with admin privileges.
+- Only the script was copied: keep the whole folder, especially `payload/`.
+- The installer enables the dynamic marketplace translation patch by default.
+- Runtime state, backups, and rollback data are stored in `payload/artifacts/` and `payload/.cursor_zh_state/`.
