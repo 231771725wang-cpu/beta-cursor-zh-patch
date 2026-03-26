@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "contents": {
+    "package": {
+      "displayName": "AI 补全",
+      "description": "从代码语言模型获取补全建议。"
+    }
+  }
+}

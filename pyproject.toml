@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cursor-zh"
+version = "0.1.0"
+description = "Cursor 全面汉化 CLI"
+requires-python = ">=3.9"
+
+[project.scripts]
+cursor-zh = "cursor_zh.cli:main"
+

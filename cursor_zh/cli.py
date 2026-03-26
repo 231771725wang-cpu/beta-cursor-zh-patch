@@ -282,6 +282,12 @@ def build_store_extension_readme(
     lines.extend(
         [
             "",
+            "## 兼容性",
+            "",
+            "- 这是标准 VSIX 语言包扩展，不限定 macOS / Windows / Linux。",
+            "- 只要对应版本的 Cursor 在各平台上使用相同的私有扩展 ID 与本地化键，这个包就可复用。",
+            "- 当前导出基于 Cursor `2.6.18`，如后续版本变更了扩展 ID 或键名，请先重新执行导出。",
+            "",
             "## 安装方式",
             "",
             "1. 在 Cursor 中先安装官方简体中文语言包 `MS-CEINTL.vscode-language-pack-zh-hans`。",
@@ -398,7 +404,7 @@ def run_export_store_extension(
     publisher: str = "beta-cursor",
     version: str = "0.1.0",
     package_name: str = "beta-cursor-hanhua",
-    package_display_name: str = "Beta-cursor 汉化",
+    package_display_name: str = "Beta-Cursor-汉化",
 ) -> dict[str, Any]:
     ensure_dirs()
     output_root = output_dir or STORE_EXTENSION_DIR
@@ -622,12 +628,11 @@ def run_scan(ctx: CursorContext) -> dict[str, Any]:
 
     for file_path in targets:
         content = read_text(file_path)
-        scan_content = strip_dynamic_market_patch(content) if file_path.name == DYNAMIC_MARKET_TARGET_REL.name else content
         tracked_hits: dict[str, int] = {}
         for phrase in tracked_phrases:
             if not is_safe_static_phrase_for_path(file_path, phrase):
                 continue
-            count = scan_content.count(phrase)
+            count = content.count(phrase)
             if count > 0:
                 tracked_hits[phrase] = count
                 total_hits += count
@@ -1092,17 +1097,6 @@ def has_dynamic_market_patch(content: str) -> bool:
     return DYNAMIC_MARKET_MARK_BEGIN in content and DYNAMIC_MARKET_MARK_END in content
 
 
-def strip_dynamic_market_patch(content: str) -> str:
-    begin = content.find(DYNAMIC_MARKET_MARK_BEGIN)
-    end = content.find(DYNAMIC_MARKET_MARK_END)
-    if begin < 0 or end < begin:
-        return content
-    end_pos = end + len(DYNAMIC_MARKET_MARK_END)
-    if end_pos < len(content) and content[end_pos : end_pos + 1] == "\n":
-        end_pos += 1
-    return f"{content[:begin]}{content[end_pos:]}"
-
-
 def upsert_dynamic_market_patch(content: str, patch_block: str) -> tuple[str, bool]:
     begin = content.find(DYNAMIC_MARKET_MARK_BEGIN)
     end = content.find(DYNAMIC_MARKET_MARK_END)
@@ -1391,7 +1385,7 @@ def build_store_extension_license() -> str:
         [
             "MIT License",
             "",
-            "Copyright (c) 2026 Beta-cursor 汉化 contributors",
+            "Copyright (c) 2026 Beta-Cursor-汉化 contributors",
             "",
             "Permission is hereby granted, free of charge, to any person obtaining a copy",
             "of this software and associated documentation files (the \"Software\"), to deal",
@@ -1849,16 +1843,15 @@ def run_verify(manifest: dict[str, Any], threshold: float) -> dict[str, Any]:
         if not path.exists():
             continue
         content = read_text(path)
-        verify_content = strip_dynamic_market_patch(content) if path.name == DYNAMIC_MARKET_TARGET_REL.name else content
         for term in forbidden_terms:
-            if term and term in verify_content:
+            if term and term in content:
                 forbidden_hits.append({"path": str(path), "term": term})
 
         for repl in file_item.get("replacements", []):
             src = repl["from"]
             dst = repl["to"]
-            src_count = verify_content.count(src)
-            dst_count = verify_content.count(dst)
+            src_count = content.count(src)
+            dst_count = content.count(dst)
             slot = phrase_status.setdefault(
                 src,
                 {
@@ -2021,12 +2014,12 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
             "### 安装",
             "",
             "- 把整个目录拷到目标电脑，不要只拷单个脚本文件。",
-            "- macOS：推荐先把目录移到 `~/work`、`~/Applications` 或其他非“桌面/下载/文稿”位置，再进入 `macOS/` 运行 `安装.command`，首次成功率更高。",
+            "- macOS：进入 `macOS/`，双击 `macOS/安装.command`。",
             "- Windows：进入 `Windows/`，双击 `Windows/安装.bat`。",
             "- 如需手动指定 Cursor 路径，可按下面方式运行：",
             "",
             "```bash",
-            "./macOS/安装.command /Applications/Cursor.app",
+            "./macOS/安装.command /Applications/Cursor.app/Contents/Resources/app",
             "```",
             "",
             "```bat",
@@ -2042,9 +2035,6 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
             "### 常见问题",
             "",
             "- 双击打不开：macOS 请右键后选择“打开”；Windows 请右键“以管理员身份运行”或在终端里执行。",
-            "- macOS 提示“已损坏”或“无法验证开发者”：这通常是 Gatekeeper 对未签名脚本的拦截，并不一定真损坏。先在终端执行 `xattr -dr com.apple.quarantine \"<解压后的补丁目录>\"`，再重新双击 `macOS/安装.command`。",
-            "- 如果补丁目录位于“桌面/下载/文稿”，macOS 还可能要求给 Terminal 打开对应的“文件与文件夹”开关。把补丁目录移到非受保护目录后再运行，通常更顺。",
-            "- 如果补丁是从浏览器下载到另一台 Mac，这个提示更常见；没有 Apple Developer ID 签名与公证时，通常无法彻底免掉首次放行。",
             "- 提示没有权限：说明当前账户无权写入 Cursor 安装目录，请使用管理员权限。",
             "- 只拷了脚本文件：不行，必须保留 `payload/` 目录。",
             dynamic_line_zh,
@@ -2057,12 +2047,12 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
             "### Install",
             "",
             "- Copy the entire folder to the target machine. Do not copy only one script file.",
-            "- macOS: for the best first-run success rate, move the bundle to a non-protected folder such as `~/work` or `~/Applications`, then run `macOS/安装.command`.",
+            "- macOS: open the `macOS/` folder and double-click `macOS/安装.command`.",
             "- Windows: open the `Windows/` folder and double-click `Windows/安装.bat`.",
             "- To pass a custom Cursor path, run:",
             "",
             "```bash",
-            "./macOS/安装.command /Applications/Cursor.app",
+            "./macOS/安装.command /Applications/Cursor.app/Contents/Resources/app",
             "```",
             "",
             "```bat",
@@ -2078,9 +2068,6 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
             "### Troubleshooting",
             "",
             "- Script does not open: on macOS use Right Click -> Open; on Windows try Run as administrator or execute it in Terminal/Command Prompt.",
-            "- If macOS says the script is damaged or from an unidentified developer, it is usually Gatekeeper blocking an unsigned script rather than real corruption. Run `xattr -dr com.apple.quarantine \"<extracted bundle folder>\"` in Terminal, then open `macOS/安装.command` again.",
-            "- If the bundle lives under Desktop, Downloads, or Documents, macOS may also ask for Terminal access to that folder. Moving the bundle to a non-protected folder usually avoids this extra prompt.",
-            "- This is more common when the bundle is downloaded through a browser. Without Apple Developer ID signing and notarization, the first-run approval usually cannot be fully avoided.",
             "- Permission denied: the current account cannot write to the Cursor install directory. Run with admin privileges.",
             "- Only the script was copied: keep the whole folder, especially `payload/`.",
             dynamic_line_en,
@@ -2099,60 +2086,15 @@ def build_local_bundle_install_script(enable_dynamic_market: bool) -> str:
             'SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"',
             'ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"',
             'PAYLOAD_DIR="$ROOT_DIR/payload"',
-            'TARGET_INPUT="${1:-/Applications/Cursor.app}"',
-            'TARGET_APP="$TARGET_INPUT"',
+            'TARGET_APP="${1:-/Applications/Cursor.app/Contents/Resources/app}"',
             'finish(){ local status=$?; if [[ -t 0 ]]; then echo; read -r -p "按回车关闭窗口..." _; fi; exit "$status"; }',
-            'log(){ echo "[install-local-patch] $*"; }',
-            'resolve_cursor_app(){',
-            '  if [[ "$1" == *.app ]]; then',
-            '    printf "%s\\n" "$1/Contents/Resources/app"',
-            "  else",
-            '    printf "%s\\n" "$1"',
-            "  fi",
-            "}",
-            'detect_python(){',
-            '  local candidate',
-            '  for candidate in python3 /usr/bin/python3 python; do',
-            '    if command -v "$candidate" >/dev/null 2>&1; then',
-            '      printf "%s\\n" "$candidate"',
-            '      return 0',
-            "    fi",
-            "  done",
-            "  return 1",
-            "}",
-            'is_protected_bundle_root(){',
-            '  case "$1" in',
-            '    "$HOME/Desktop"|"$HOME/Desktop/"*|"$HOME/Documents"|"$HOME/Documents/"*|"$HOME/Downloads"|"$HOME/Downloads/"*) return 0 ;;',
-            '  esac',
-            '  return 1',
-            "}",
             "trap finish EXIT",
-            'TARGET_APP="$(resolve_cursor_app "$TARGET_INPUT")"',
-            'if [[ "${CURSOR_ZH_STAGED:-0}" != "1" ]] && is_protected_bundle_root "$ROOT_DIR"; then',
-            '  STAGE_ROOT="${TMPDIR:-/tmp}/cursor-zh-stage-$$"',
-            '  STAGE_DIR="$STAGE_ROOT/bundle"',
-            '  mkdir -p "$STAGE_ROOT"',
-            '  if command -v ditto >/dev/null 2>&1; then',
-            '    ditto "$ROOT_DIR" "$STAGE_DIR"',
-            "  else",
-            '    cp -R "$ROOT_DIR" "$STAGE_DIR"',
-            "  fi",
-            '  xattr -dr com.apple.quarantine "$STAGE_DIR" 2>/dev/null || true',
-            '  log "检测到补丁目录位于 macOS 受保护位置: $ROOT_DIR"',
-            '  log "已复制到临时目录后继续安装，以减少首次运行时的 Terminal 文件访问拦截。"',
-            '  exec env CURSOR_ZH_STAGED=1 "$STAGE_DIR/macOS/安装.command" "$TARGET_INPUT"',
-            "fi",
-            'xattr -dr com.apple.quarantine "$ROOT_DIR" 2>/dev/null || true',
             'if [[ ! -d "$TARGET_APP" ]]; then',
             '  echo "[install-local-patch] 未找到 Cursor 资源目录: $TARGET_APP" >&2',
             "  exit 2",
             "fi",
-            'if ! PYTHON_BIN="$(detect_python)"; then',
-            '  echo "[install-local-patch] 未找到 Python 3，请先安装 Python 3 再重试。" >&2',
-            "  exit 3",
-            "fi",
             'export PYTHONPATH="$PAYLOAD_DIR${PYTHONPATH:+:$PYTHONPATH}"',
-            '"$PYTHON_BIN" -m cursor_zh apply --manifest "$PAYLOAD_DIR/patch_manifest.json" --cursor-app "$TARGET_APP" '
+            'python3 -m cursor_zh apply --manifest "$PAYLOAD_DIR/patch_manifest.json" --cursor-app "$TARGET_APP" '
             + dynamic_flag,
             "",
         ]
@@ -2168,24 +2110,9 @@ def build_local_bundle_rollback_script() -> str:
             'ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"',
             'PAYLOAD_DIR="$ROOT_DIR/payload"',
             'finish(){ local status=$?; if [[ -t 0 ]]; then echo; read -r -p "按回车关闭窗口..." _; fi; exit "$status"; }',
-            'detect_python(){',
-            '  local candidate',
-            '  for candidate in python3 /usr/bin/python3 python; do',
-            '    if command -v "$candidate" >/dev/null 2>&1; then',
-            '      printf "%s\\n" "$candidate"',
-            '      return 0',
-            "    fi",
-            "  done",
-            "  return 1",
-            "}",
             "trap finish EXIT",
-            'xattr -dr com.apple.quarantine "$ROOT_DIR" 2>/dev/null || true',
-            'if ! PYTHON_BIN="$(detect_python)"; then',
-            '  echo "[rollback-local-patch] 未找到 Python 3，请先安装 Python 3 再重试。" >&2',
-            "  exit 3",
-            "fi",
             'export PYTHONPATH="$PAYLOAD_DIR${PYTHONPATH:+:$PYTHONPATH}"',
-            '"$PYTHON_BIN" -m cursor_zh rollback --state "$PAYLOAD_DIR/.cursor_zh_state/last_apply.json"',
+            'python3 -m cursor_zh rollback --state "$PAYLOAD_DIR/.cursor_zh_state/last_apply.json"',
             "",
         ]
     )

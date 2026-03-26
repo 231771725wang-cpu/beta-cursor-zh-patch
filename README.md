@@ -1,99 +1,85 @@
-# Beta Cursor 全面汉化补丁
+# cursor-zh
 
-[![Release](https://img.shields.io/github/v/release/231771725wang-cpu/beta-cursor-zh-patch?label=Release)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases)
-[![License](https://img.shields.io/github/license/231771725wang-cpu/beta-cursor-zh-patch?label=License)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/blob/main/LICENSE)
-[![Actions](https://img.shields.io/github/actions/workflow/status/231771725wang-cpu/beta-cursor-zh-patch/cross-platform-smoke.yml?label=Smoke%20Test)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/actions/workflows/cross-platform-smoke.yml)
+面向 Cursor 的“双层汉化”工具链：
 
-这是一个面向 Cursor Beta 版本的本地汉化补丁仓库，目标是尽量在不改动日常使用方式的前提下，把 Cursor 的核心设置、智能体相关页面和常见界面文案翻译成简体中文。
+- 完整补丁版：官方语言包 + 私有文案补丁 + 插件市场动态简介补丁
+- 商店安全版：导出为 Open VSX / Cursor 可发布的语言包扩展
 
-本仓库只包含补丁脚本、翻译数据和说明，不包含 Cursor 原始安装包或官方资源备份文件。
+## 最新验证
 
-## 截图对比
+- 已重新适配并验证 Cursor `2.6.21`
+- 目标提交哈希: `fea2f546c979a0a4ad1deab23552a43568807590`
+- 2026-03-26 已确认欢迎页与设置页关键运行时文案补丁生效
 
-### General / 通用
+## 能力
 
-| Before | After |
-| --- | --- |
-| ![Before General](assets/screenshots/before-general.png) | ![After General](assets/screenshots/after-general.png) |
+- `scan`: 扫描 Cursor 私有英文文案命中，并区分静态可替换与动态候选文本
+- `build`: 构建版本化 `patch_manifest`
+- `qa`: 执行占位符/术语/禁用词质检
+- `apply`: 支持 dry-run 与实际应用，自动备份；默认同步运行时完整性补丁，可选注入插件市场动态汉化补丁
+- `export-local-bundle`: 导出可拷到下一台电脑上直接运行的本地汉化补丁包（macOS + Windows）
+- `verify`: 产出 `coverage_report` 并按阈值验收
+- `rollback`: 从最近备份一键回滚
+- `upgrade`: 更新后自动重扫/重建/复核，并检查动态补丁锚点有效性
+- `export-store-extension`: 生成 `Beta-cursor 汉化` 扩展骨架，补充 Cursor 私有扩展的标准本地化键
 
-### Agents / 智能体
+## 目录
 
-| Before | After |
-| --- | --- |
-| ![Before Agents](assets/screenshots/before-agents.png) | ![After Agents](assets/screenshots/after-agents.png) |
+- `data/glossary`: 术语与禁用词
+- `data/translations/custom_phrases.json`: 私有文案翻译映射
+- `data/translations/dynamic_market_phrases.json`: 插件市场动态简介翻译映射
+- `data/coverage/core_phrases.json`: 覆盖率核心短语
+- `artifacts/patch_manifest`: 版本补丁清单
+- `artifacts/coverage_report`: 覆盖率报告
 
-### Rules, Skills, Subagents / 规则、技能、子智能体
-
-| Before | After |
-| --- | --- |
-| ![Before Rules, Skills, Subagents](assets/screenshots/before-rules-skills-subagents.png) | ![After Rules, Skills, Subagents](assets/screenshots/after-rules-skills-subagents.png) |
-
-## 当前状态
-
-- macOS（Apple Silicon）已验证可用
-- Windows 已补充启动器与 GitHub Actions 脚本级冒烟验证，但暂未做作者本人实机长时间验证
-- 仓库默认附带 macOS 与 Windows 两套安装/回滚入口
-
-## 安装
-
-详细说明见 [使用说明.txt](使用说明.txt)。
-
-### macOS
-
-1. 下载或克隆仓库后，先把目录移到 `~/work`、`~/Applications` 或其他非“桌面/下载/文稿”位置。
-2. 进入 `macOS/`，运行 `安装.command`。
-3. 如遇到 Gatekeeper 提示，可先执行：
+## 用法
 
 ```bash
-xattr -dr com.apple.quarantine "<仓库目录>"
+./cursor-zh scan
+./cursor-zh build
+./cursor-zh qa
+./cursor-zh apply --dry-run
+./cursor-zh apply
+./cursor-zh apply --cursor-app /Applications/Cursor.app/Contents/Resources/app
+./cursor-zh apply --enable-dynamic-market
+./cursor-zh export-local-bundle
+./cursor-zh export-local-bundle --enable-dynamic-market
+./cursor-zh export-local-bundle --zip
+./cursor-zh verify --threshold 98
+./cursor-zh rollback
+./cursor-zh upgrade --threshold 98
+./cursor-zh export-store-extension
 ```
 
-4. 如需手动指定 Cursor 路径，可运行：
+> `apply` 默认会修正 Cursor 运行时完整性检查，避免补丁后继续出现 “installation appears to be corrupt” 误报；这不会恢复 macOS 官方签名。
+> 若写入 `/Applications/Cursor.app` 提示权限不足，请使用管理员权限执行 `apply`，或先在桌面副本上应用后手动替换。
+> 动态补丁在锚点不匹配时会自动降级为只读告警，不会注入高风险改动。
+
+## 跨电脑一键复现
 
 ```bash
-./macOS/安装.command /Applications/Cursor.app
+./cursor-zh export-local-bundle
 ```
 
-### Windows
+- 默认导出到 `artifacts/local_bundle/<bundle-name>/`，保留完整目录版
+- 如需分发压缩包，可追加 `--zip` 生成同名 `.zip`
+- 产物内包含 macOS 的 `安装-macOS.command` / `回滚-macOS.command`
+- 也包含 Windows 的 `安装-Windows.bat` / `回滚-Windows.bat`
+- 附带 `使用说明.txt`，提供中英双语安装、回滚与排障说明
+- 拷到另一台电脑后可直接双击；如需指定路径，也可在终端或 CMD 里传入目标 Cursor `resources/app` 目录
 
-1. 进入 `Windows/`，运行 `安装.bat`。
-2. 默认会尝试查找：
+如需给 GitHub Release 提供可下载附件，建议使用：
 
-```text
-C:\Users\<You>\AppData\Local\Programs\Cursor\resources\app
+```bash
+./cursor-zh export-local-bundle --zip
 ```
 
-3. 如需手动指定路径，可运行：
+推荐把生成的 `Beta-Cursor-全面汉化-<version>-<commit>.zip` 作为 release asset 上传。
 
-```bat
-Windows\安装.bat "C:\Users\<You>\AppData\Local\Programs\Cursor\resources\app"
-```
+## 商店版与完整补丁版的边界
 
-## 回滚
-
-- macOS：运行 `macOS/回滚.command`
-- Windows：运行 `Windows/回滚.bat`
-
-## 项目结构
-
-- `payload/cursor_zh/`：补丁主逻辑
-- `payload/data/`：翻译数据、术语表与覆盖短语
-- `macOS/`：macOS 安装与回滚入口
-- `Windows/`：Windows 安装与回滚入口
-- `assets/screenshots/`：README 对比截图
-
-## 注意事项
-
-- 这是本地补丁，不是 Cursor 官方语言包
-- 首次从浏览器下载到 macOS 时，系统可能会拦截未签名脚本，这是系统安全策略，不代表补丁损坏
-- 如果补丁目录位于“桌面/下载/文稿”，macOS 还可能要求给 Terminal 打开“文件与文件夹”权限
-- 发布到 GitHub 时，建议使用 Releases 分发 ZIP，避免直接让用户复制零散文件
-
-## 免责声明
-
-本项目与 Cursor 官方无关，仅供个人学习、界面本地化和交流使用。请在你拥有合法 Cursor 使用权的前提下使用本补丁。
-
-## 许可证
-
-待发布时确认。  
-如果你想要一个对首个开源项目最省心的方案，推荐使用 `MIT License`。
+- `export-store-extension` 只导出 Cursor 已暴露给标准本地化系统的文案，例如部分 `cursor-*` 内置扩展的 `package.nls.json`。
+- 直接写死在 `workbench.desktop.main.js`、`out/nls.messages.json` 或其他主程序资源里的私有文案，不能等价迁移为纯语言包扩展。
+- 因此要想“像插件一样上架”并同时保持当前这套高覆盖率，建议维护两条产线：
+- `beta-cursor-hanhua/`：给 Open VSX / Cursor 商店上架的安全版。
+- 根目录 `cursor-zh` CLI：给本地用户用的完整补丁版。
