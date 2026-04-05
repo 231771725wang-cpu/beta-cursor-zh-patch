@@ -1,0 +1,109 @@
+{
+  "manifest_version": 1,
+  "generated_at": "2026-04-05T13:03:59.352693+00:00",
+  "cursor": {
+    "app_path": null,
+    "version": "3.0.12",
+    "commit": "a80ff7dfcaa45d7750f6e30be457261379c29b00",
+    "lang_pack_path": "/Users/chiyou/.cursor/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.105.0-universal"
+  },
+  "summary": {
+    "files_with_replacements": 2,
+    "replacement_items": 15,
+    "replacement_expected_hits": 115,
+    "untranslated_phrases_count": 0
+  },
+  "untranslated_phrases": [],
+  "files": [
+    {
+      "path": "out/nls.messages.json",
+      "source_sha256": "97255423197f3db0ba88feec032147d0cbebfc9dcc155174da1c956da0452a90",
+      "replacements": [
+        {
+          "from": "\"Open Workspace\"",
+          "to": "\"打开工作区\"",
+          "expected_hits": 2
+        },
+        {
+          "from": "Open Workspace",
+          "to": "打开工作区",
+          "expected_hits": 12
+        },
+        {
+          "from": "Home",
+          "to": "首页",
+          "expected_hits": 2
+        }
+      ],
+      "target_rel_path": "out/nls.messages.json"
+    },
+    {
+      "path": "out/vs/workbench/workbench.desktop.main.js",
+      "source_sha256": "415c3f9cd922e4d4bee448015c7384ac07a8470dfdf576b5dafc887c00a1624d",
+      "replacements": [
+        {
+          "from": "\"Ask questions without making changes...\"",
+          "to": "\"只提问，不做改动...\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Ask questions without making changes...",
+          "to": "只提问，不做改动...",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Open Editor Window\"",
+          "to": "\"打开编辑器窗口\"",
+          "expected_hits": 3
+        },
+        {
+          "from": "Open Editor Window",
+          "to": "打开编辑器窗口",
+          "expected_hits": 3
+        },
+        {
+          "from": "\"Open Workspace\"",
+          "to": "\"打开工作区\"",
+          "expected_hits": 6
+        },
+        {
+          "from": "\"Plan New Idea\"",
+          "to": "\"规划新想法\"",
+          "expected_hits": 3
+        },
+        {
+          "from": "\"Run in Cloud\"",
+          "to": "\"在云端运行\"",
+          "expected_hits": 2
+        },
+        {
+          "from": "Open Workspace",
+          "to": "打开工作区",
+          "expected_hits": 12
+        },
+        {
+          "from": "Plan New Idea",
+          "to": "规划新想法",
+          "expected_hits": 3
+        },
+        {
+          "from": "Cloud Agents",
+          "to": "云端智能体",
+          "expected_hits": 37
+        },
+        {
+          "from": "Run in Cloud",
+          "to": "在云端运行",
+          "expected_hits": 2
+        },
+        {
+          "from": "\"Home\"",
+          "to": "\"首页\"",
+          "expected_hits": 26
+        }
+      ],
+      "target_rel_path": "out/vs/workbench/workbench.desktop.main.js"
+    }
+  ],
+  "portable": true
+}

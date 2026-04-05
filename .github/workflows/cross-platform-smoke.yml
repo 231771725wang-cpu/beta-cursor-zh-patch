@@ -1,0 +1,122 @@
+name: Cross Platform Smoke
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Smoke (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate CLI syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("payload/cursor_zh/cli.py").read_text(encoding="utf-8")
+          compile(source, "payload/cursor_zh/cli.py", "exec")
+          print("cli.py syntax ok")
+          PY
+
+      - name: Export local bundle
+        shell: bash
+        run: |
+          export PYTHONPATH=payload
+          rm -rf .ci-bundle
+          python -m cursor_zh export-local-bundle \
+            --manifest payload/patch_manifest.json \
+            --output-dir .ci-bundle \
+            --enable-dynamic-market
+
+      - name: Export experimental overlay
+        shell: bash
+        run: |
+          export PYTHONPATH=payload
+          rm -rf .ci-store-overlay .ci-cursor-app
+          mkdir -p .ci-cursor-app/extensions/cursor-private-sample
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path(".ci-cursor-app")
+          (root / "package.json").write_text(json.dumps({"version": "3.0.12"}), encoding="utf-8")
+          (root / "product.json").write_text(json.dumps({"commit": "test-commit"}), encoding="utf-8")
+          ext = root / "extensions" / "cursor-private-sample"
+          (ext / "package.json").write_text(
+              json.dumps({"publisher": "anysphere", "name": "cursor-private-sample"}),
+              encoding="utf-8",
+          )
+          (ext / "package.nls.json").write_text(
+              json.dumps({"test.title": "Open Workspace"}),
+              encoding="utf-8",
+          )
+          PY
+          python -m cursor_zh export-store-extension \
+            --cursor-app .ci-cursor-app \
+            --output-dir .ci-store-overlay
+
+      - name: Validate generated bundle files
+        shell: bash
+        run: |
+          test -f .ci-bundle/macOS/安装.command
+          test -f .ci-bundle/macOS/回滚.command
+          test -f .ci-bundle/Windows/安装.bat
+          test -f .ci-bundle/Windows/回滚.bat
+
+      - name: Validate overlay metadata and copy text
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          package = json.loads(Path(".ci-store-overlay/package.json").read_text(encoding="utf-8"))
+          readme = Path(".ci-store-overlay/README.md").read_text(encoding="utf-8")
+          changelog = Path(".ci-store-overlay/CHANGELOG.md").read_text(encoding="utf-8")
+          root_readme = Path("README.md").read_text(encoding="utf-8")
+
+          assert package["name"] == "beta-cursor-private-zh-overlay"
+          assert package["displayName"] == "Beta Cursor 私有扩展汉化覆盖层（实验）"
+          assert "extensionDependencies" not in package
+          assert "依赖官方简体中文语言包" not in readme
+          assert "实验性的 Cursor 私有扩展汉化覆盖层" in readme
+          assert "不依赖官方简体中文语言包作为安装前提" in changelog
+          assert "官方简体中文语言包的补丁层" not in root_readme
+          assert "独立本地完整汉化补丁仓库" in root_readme
+          PY
+
+  windows-wrapper:
+    name: Windows Wrapper Smoke
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Windows installer wrapper with missing target
+        shell: cmd
+        run: |
+          Windows\安装.bat "%RUNNER_TEMP%\missing-cursor-app"
+          if not "%ERRORLEVEL%"=="2" exit /b 1

@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 ARTIFACTS_DIR = ROOT / "artifacts"
 STATE_DIR = ROOT / ".cursor_zh_state"
-STORE_EXTENSION_DIR = ROOT / "beta-cursor-hanhua"
+STORE_EXTENSION_DIR = ROOT / "beta-cursor-private-zh-overlay"
 
 SCAN_DIR = ARTIFACTS_DIR / "scan"
 PATCH_MANIFEST_DIR = ARTIFACTS_DIR / "patch_manifest"
@@ -47,6 +47,9 @@ PH_RE = re.compile(r"\{[0-9]+\}")
 EN_RE = re.compile(r"[A-Za-z][A-Za-z0-9&/().,:;'\-+ ]{2,}")
 CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 IDENTIFIER_LIKE_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$.-]*$")
+WORKBENCH_USER_VISIBLE_LITERAL_RE = re.compile(
+    r'(?:label|title|placeholder|description|text|hint|aria-label)\s*:\s*"((?:\\.|[^"\\]){4,200})"'
+)
 DYNAMIC_MARKET_MARK_BEGIN = "/* CURSOR_ZH_DYNAMIC_MARKET_BEGIN v1 */"
 DYNAMIC_MARKET_MARK_END = "/* CURSOR_ZH_DYNAMIC_MARKET_END v1 */"
 DYNAMIC_MARKET_TARGET_REL = Path("out/vs/workbench/workbench.desktop.main.js")
@@ -59,6 +62,18 @@ INTEGRITY_SERVICE_PATCHED = "async _isPure(){return{isPure:!0,proof:[]}}"
 STATIC_REPLACEMENT_BLOCKLIST = {
     "out/main.js",
 }
+AGENT_MENU_CONTEXTUAL_REPLACEMENTS = (
+    {
+        "id": "agent_mode_menu",
+        "source": 'AnA=[{mode:"off",label:"Off"},{mode:"auto",label:"Auto"},{mode:"on",label:"On"}]',
+        "target": 'AnA=[{mode:"off",label:"关闭"},{mode:"auto",label:"自动"},{mode:"on",label:"开启"}]',
+    },
+    {
+        "id": "agent_archive_filter_menu",
+        "source": 'ilS=[{mode:"only_unread",label:"仅未读",icon:"bell"},{mode:"only_archived",label:"仅已归档",icon:"archive"},{mode:"include_archived",label:"包含已归档",icon:"layers"},{mode:"off",label:"Off",icon:"circle"}]',
+        "target": 'ilS=[{mode:"only_unread",label:"仅未读",icon:"bell"},{mode:"only_archived",label:"仅已归档",icon:"archive"},{mode:"include_archived",label:"包含已归档",icon:"layers"},{mode:"off",label:"关闭",icon:"circle"}]',
+    },
+)
 
 
 @dataclass
@@ -266,13 +281,15 @@ def build_store_extension_readme(
     lines = [
         f"# {package_display_name}",
         "",
-        "面向 Cursor 的商店安全版汉化增强扩展，优先补足官方简体中文语言包尚未覆盖的 Cursor 私有扩展文案。",
+        "这是一个实验性的 Cursor 私有扩展汉化覆盖层，用于补充标准本地化接口可见的 Cursor 私有扩展文案。",
         "",
-        "## 亮点",
+        "它不是仓库主产物，也不等价于本仓库的本地完整汉化补丁。",
         "",
-        "- 依赖官方简体中文语言包，补充 Cursor 自带私有扩展里已暴露到 `package.nls.json` 的文案。",
-        "- 不修改 Cursor.app 主程序文件，适合打包为 VSIX 并发布到 Open VSX / Cursor 扩展发现链路。",
-        "- 不覆盖 `workbench.desktop.main.js` 里的硬编码文案；这部分仍需仓库根目录的 `cursor-zh apply` 补丁链处理。",
+        "## 能力边界",
+        "",
+        "- 仅覆盖 Cursor 自带私有扩展里已经暴露到 `package.nls.json` 的文案。",
+        "- 不修改 Cursor.app 主程序文件，适合打包为 VSIX 或作为实验性附属产物分发。",
+        "- 不覆盖 `workbench.desktop.main.js` 等主程序硬编码文案；这部分仍需仓库根目录的 `cursor-zh apply` 补丁链处理。",
         "",
         "## 当前生成信息",
         "",
@@ -280,7 +297,7 @@ def build_store_extension_readme(
         f"- 目标提交哈希: `{ctx.commit}`",
         f"- 扩展名: `{package_name}`",
         f"- 已生成本地化目标: `{len(translated_targets)}` 个",
-        f"- 无法导出到商店语言包的 Cursor 内置扩展: `{len(blocked_targets)}` 个",
+        f"- 无法导出到该覆盖层的 Cursor 内置扩展: `{len(blocked_targets)}` 个",
         "",
         "## 已覆盖的 Cursor 内置扩展",
         "",
@@ -301,11 +318,11 @@ def build_store_extension_readme(
             "",
             "## 安装方式",
             "",
-            "1. 在 Cursor 中先安装官方简体中文语言包 `MS-CEINTL.vscode-language-pack-zh-hans`。",
-            "2. 安装本扩展的 `.vsix`，然后重载 Cursor。",
-            "3. 若仍有未汉化区域，属于 Cursor 主程序硬编码文案，请配合本仓库根目录的完整补丁版使用。",
+            "1. 安装本扩展的 `.vsix`，然后重载 Cursor。",
+            "2. 若仍有未汉化区域，说明它属于 Cursor 主程序硬编码文案或未暴露到标准本地化接口的私有界面，请改用本仓库根目录的完整补丁链。",
+            "3. 如果你还想补齐 Cursor / VS Code 公共界面的通用简体中文，可额外叠加官方简体中文语言包，但这不是本扩展的前置条件。",
             "",
-            "## 当前无法直接做成商店语言包的内置扩展",
+            "## 当前无法直接做成覆盖层的内置扩展",
             "",
         ]
     )
@@ -326,23 +343,23 @@ def build_store_extension_readme(
             "可选参数：",
             "",
             "- `--publisher your-openvsx-namespace`",
-            f"- `--version {version}`",
-            "- `--output-dir ./beta-cursor-hanhua`",
+            "- `--version 0.1.0`",
+            "- `--output-dir ./beta-cursor-private-zh-overlay`",
             "",
             "## 打包与发布",
             "",
             "```bash",
-            "cd beta-cursor-hanhua",
+            "cd beta-cursor-private-zh-overlay",
             "./scripts/package-openvsx.sh",
             "OPEN_VSX_TOKEN=xxxx ./scripts/publish-openvsx.sh",
             "```",
             "",
             "## 边界说明",
             "",
-            "- Cursor 商店版只承载标准本地化接口可见的文案。",
-            "- 你的“全方位汉化”里那些直接改主程序 JS 的部分，不能等价迁移成纯语言包。",
-            "- 如果要追求与当前补丁版接近的覆盖率，建议并行维护两个产物：",
-            "- `beta-cursor-hanhua/`：Open VSX / Cursor 商店安全版。",
+            "- 该覆盖层只承载标准本地化接口可见的文案。",
+            "- 直接改主程序 JS 的完整汉化部分，不能等价迁移成纯语言包或纯覆盖层。",
+            "- 如需接近本仓库当前覆盖率，应优先使用仓库根目录的本地完整补丁版。",
+            "- `beta-cursor-private-zh-overlay/`：实验性私有扩展汉化覆盖层。",
             "- 仓库根目录 `cursor-zh`：本地完整补丁版。",
             "",
         ]
@@ -387,14 +404,14 @@ def write_store_extension_package(
     package = {
         "name": package_name,
         "displayName": package_display_name,
-        "description": "Chinese localization overlay for Cursor private extensions. 补充 Cursor 私有扩展简体中文界面。",
+        "description": "Experimental Chinese overlay for Cursor private extensions. 实验性补充 Cursor 私有扩展简体中文界面。",
         "version": version,
         "publisher": publisher,
         "license": "MIT",
         "icon": "media/icon.png",
         "engines": {"vscode": vscode_engine},
         "categories": ["Language Packs"],
-        "keywords": ["cursor", "chinese", "zh-cn", "language pack", "hanhua"],
+        "keywords": ["cursor", "chinese", "zh-cn", "overlay", "private-extension", "hanhua"],
         "galleryBanner": {"color": "#0b1836", "theme": "dark"},
         "files": [
             "media/**",
@@ -408,7 +425,6 @@ def write_store_extension_package(
             "package:openvsx": "bash ./scripts/package-openvsx.sh",
             "publish:openvsx": "bash ./scripts/publish-openvsx.sh",
         },
-        "extensionDependencies": ["MS-CEINTL.vscode-language-pack-zh-hans"],
         "contributes": {
             "localizations": [
                 {
@@ -428,8 +444,8 @@ def run_export_store_extension(
     output_dir: Path | None = None,
     publisher: str = "beta-cursor",
     version: str = "0.1.0",
-    package_name: str = "beta-cursor-hanhua",
-    package_display_name: str = "Beta-Cursor-汉化",
+    package_name: str = "beta-cursor-private-zh-overlay",
+    package_display_name: str = "Beta Cursor 私有扩展汉化覆盖层（实验）",
 ) -> dict[str, Any]:
     ensure_dirs()
     output_root = output_dir or STORE_EXTENSION_DIR
@@ -512,7 +528,21 @@ def run_export_store_extension(
             version=version,
         ),
     )
-    write_text(output_root / "CHANGELOG.md", build_store_extension_changelog(ctx, version))
+    write_text(
+        output_root / "CHANGELOG.md",
+        "\n".join(
+            [
+                "# Changelog",
+                "",
+                "## 0.1.0",
+                "",
+                f"- 初始导出，适配 Cursor {ctx.version}。",
+                "- 首次导出实验性私有扩展汉化覆盖层。",
+                "- 覆盖标准本地化接口可见的 Cursor 私有扩展文案，不依赖官方简体中文语言包作为安装前提。",
+                "",
+            ]
+        ),
+    )
 
     report = {
         "generated_at": now_iso(),
@@ -601,6 +631,138 @@ def english_literals_from_package_json(path: Path, limit: int = 30) -> list[str]
     return values[:limit]
 
 
+def is_user_visible_english_literal(literal: str, *, allow_single_word: bool = False) -> bool:
+    text = literal.strip()
+    if len(text) < 4 or len(text) > 160:
+        return False
+    if CJK_RE.search(text):
+        return False
+    if "\n" in text or "\r" in text or "\t" in text:
+        return False
+    if "http://" in text or "https://" in text:
+        return False
+    if text.startswith("$(") or text.endswith(".json"):
+        return False
+    if IDENTIFIER_LIKE_RE.fullmatch(text):
+        return False
+    if re.search(r"[{}<>`]", text):
+        return False
+    if re.search(r"(^|[^A-Za-z])(on[A-Z][A-Za-z0-9]+|[A-Za-z0-9_-]+\.[A-Za-z0-9_.-]+)($|[^A-Za-z])", text):
+        return False
+    words = re.findall(r"[A-Za-z]+", text)
+    if not words:
+        return False
+    if len(words) == 1 and not allow_single_word:
+        return False
+    return EN_RE.search(text) is not None
+
+
+def english_literals_from_nls_messages(content: str, limit: int = 30) -> list[str]:
+    try:
+        values = json.loads(content)
+    except Exception:
+        return []
+    if not isinstance(values, list):
+        return []
+    results: list[str] = []
+    seen: set[str] = set()
+    for item in values:
+        if not isinstance(item, str):
+            continue
+        text = item.strip()
+        if not is_user_visible_english_literal(text, allow_single_word=True):
+            continue
+        if text in seen:
+            continue
+        seen.add(text)
+        results.append(text)
+        if len(results) >= limit:
+            break
+    return results
+
+
+def english_literals_from_workbench_bundle(content: str, limit: int = 30) -> list[str]:
+    results: list[str] = []
+    seen: set[str] = set()
+    for match in WORKBENCH_USER_VISIBLE_LITERAL_RE.finditer(content):
+        raw = match.group(1)
+        try:
+            text = json.loads(f'"{raw}"')
+        except Exception:
+            text = raw
+        text = text.strip()
+        if not is_user_visible_english_literal(text, allow_single_word=True):
+            continue
+        if text in seen:
+            continue
+        seen.add(text)
+        results.append(text)
+        if len(results) >= limit:
+            break
+    return results
+
+
+def sample_english_literals_for_path(path: Path, content: str, limit: int = 30) -> list[str]:
+    if path.name == "package.json":
+        return english_literals_from_package_json(path, limit=limit)
+    if path.name == "nls.messages.json":
+        return english_literals_from_nls_messages(content, limit=limit)
+    if path.name == DYNAMIC_MARKET_TARGET_REL.name:
+        return english_literals_from_workbench_bundle(content, limit=limit)
+    return []
+
+
+def sample_limit_for_path(path: Path) -> int:
+    if path.name in {"nls.messages.json", DYNAMIC_MARKET_TARGET_REL.name}:
+        return 120
+    return 30
+
+
+def translation_candidates_for_literal(literal: str) -> list[str]:
+    candidates: list[str] = []
+    for candidate in (literal, json.dumps(literal, ensure_ascii=False)):
+        if candidate and candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+def apply_replacements_to_content(content: str, replacements: list[dict[str, Any]]) -> tuple[str, int]:
+    out = content
+    total_hits = 0
+    for repl in replacements:
+        hit = out.count(repl["from"])
+        if hit <= 0:
+            continue
+        total_hits += hit
+        out = out.replace(repl["from"], repl["to"])
+    return out, total_hits
+
+
+def promote_core_sample_literals_for_path(
+    path: Path,
+    content: str,
+    residual_literals: list[str],
+    tracked_hits: dict[str, int],
+    translations: dict[str, str],
+    core_phrases: set[str],
+) -> dict[str, int]:
+    promoted_hits: dict[str, int] = {}
+    for literal in residual_literals:
+        for candidate in translation_candidates_for_literal(literal):
+            if candidate in tracked_hits:
+                continue
+            if candidate not in translations or candidate not in core_phrases:
+                continue
+            if not is_safe_static_phrase_for_path(path, candidate):
+                continue
+            count = content.count(candidate)
+            if count <= 0:
+                continue
+            tracked_hits[candidate] = count
+            promoted_hits[candidate] = count
+    return promoted_hits
+
+
 def is_dynamic_candidate_literal(literal: str) -> bool:
     text = literal.strip()
     if len(text) < 8 or " " not in text:
@@ -624,6 +786,25 @@ def file_fingerprint(ctx: CursorContext) -> str:
     return f"{ctx.version}_{commit_short}"
 
 
+def build_agent_menu_contextual_replacements(path: Path, content: str) -> list[dict[str, Any]]:
+    if path.name != DYNAMIC_MARKET_TARGET_REL.name:
+        return []
+    replacements: list[dict[str, Any]] = []
+    for rule in AGENT_MENU_CONTEXTUAL_REPLACEMENTS:
+        count = content.count(rule["source"])
+        if count <= 0:
+            continue
+        replacements.append(
+            {
+                "id": rule["id"],
+                "from": rule["source"],
+                "to": rule["target"],
+                "expected_hits": count,
+            }
+        )
+    return replacements
+
+
 def run_scan(ctx: CursorContext) -> dict[str, Any]:
     ensure_dirs()
     translations = load_custom_phrases()
@@ -638,6 +819,8 @@ def run_scan(ctx: CursorContext) -> dict[str, Any]:
     residual_literals_total = 0
     dynamic_literals_total = 0
     technical_literals_total = 0
+    promoted_phrase_items = 0
+    promoted_phrase_hits = 0
 
     for file_path in targets:
         content = read_text(file_path)
@@ -652,9 +835,21 @@ def run_scan(ctx: CursorContext) -> dict[str, Any]:
                 distinct_hits.add(phrase)
                 if phrase in core_phrases:
                     core_detected.add(phrase)
-        residual_literals = (
-            english_literals_from_package_json(file_path) if file_path.name == "package.json" else []
+        residual_literals = sample_english_literals_for_path(file_path, scan_content, limit=sample_limit_for_path(file_path))
+        promoted_hits = promote_core_sample_literals_for_path(
+            file_path,
+            scan_content,
+            residual_literals,
+            tracked_hits,
+            translations,
+            core_phrases,
         )
+        for phrase, count in promoted_hits.items():
+            total_hits += count
+            distinct_hits.add(phrase)
+            core_detected.add(phrase)
+            promoted_phrase_items += 1
+            promoted_phrase_hits += count
         dynamic_literals = [item for item in residual_literals if is_dynamic_candidate_literal(item)]
         technical_literals = [item for item in residual_literals if item not in dynamic_literals]
         residual_literals_total += len(residual_literals)
@@ -668,6 +863,7 @@ def run_scan(ctx: CursorContext) -> dict[str, Any]:
                 "tracked_hits": tracked_hits,
                 "sample_english_literals": residual_literals,
                 "sample_dynamic_literals": dynamic_literals[:15],
+                "promoted_core_hits": promoted_hits,
                 "sample_technical_literals": technical_literals[:15],
             }
         )
@@ -689,6 +885,8 @@ def run_scan(ctx: CursorContext) -> dict[str, Any]:
             "static_distinct_hit_phrases": len(distinct_hits),
             "static_total_phrase_hits": total_hits,
             "dynamic_candidate_literals": dynamic_literals_total,
+            "promoted_core_phrase_items": promoted_phrase_items,
+            "promoted_core_phrase_hits": promoted_phrase_hits,
             "technical_literals": technical_literals_total,
         },
         "files": report_files,
@@ -726,6 +924,7 @@ def run_build(scan_report: dict[str, Any]) -> dict[str, Any]:
             continue
         tracked = file_entry.get("tracked_hits", {})
         replacements: list[dict[str, Any]] = []
+        contextual_replacements: list[dict[str, Any]] = []
         for src, count in tracked.items():
             if not is_safe_static_phrase_for_path(file_path, src):
                 continue
@@ -738,11 +937,21 @@ def run_build(scan_report: dict[str, Any]) -> dict[str, Any]:
                 untranslated.add(src)
         if replacements:
             replacements.sort(key=lambda item: len(item["from"]), reverse=True)
+        if file_path.exists():
+            preview_content = read_text(file_path)
+            preview_content, _ = apply_replacements_to_content(preview_content, replacements)
+            contextual_replacements = build_agent_menu_contextual_replacements(file_path, preview_content)
+            if contextual_replacements:
+                replacement_items += len(contextual_replacements)
+                replacement_hits += sum(int(item["expected_hits"]) for item in contextual_replacements)
+        if replacements or contextual_replacements:
             file_record = {
                 "path": file_entry["path"],
                 "source_sha256": file_entry["sha256"],
                 "replacements": replacements,
             }
+            if contextual_replacements:
+                file_record["contextual_replacements"] = contextual_replacements
             if cursor_app_path:
                 rel = relative_target_path(cursor_app_path, file_path)
                 if rel:
@@ -1605,6 +1814,7 @@ def dry_run_apply(
         if not force and actual_sha != expected_sha:
             checksum_mismatch.append(str(path))
         file_counts = []
+        static_preview, _ = apply_replacements_to_content(content, file_item.get("replacements", []))
         for repl in file_item.get("replacements", []):
             hit = content.count(repl["from"])
             if hit > 0:
@@ -1617,7 +1827,27 @@ def dry_run_apply(
                     "actual_hits": hit,
                 }
             )
-        details.append({"path": str(path), "replacement_counts": file_counts})
+        contextual_counts = []
+        for repl in file_item.get("contextual_replacements", []):
+            hit = static_preview.count(repl["from"])
+            if hit > 0:
+                total_replacements += hit
+            contextual_counts.append(
+                {
+                    "id": repl.get("id"),
+                    "from": repl["from"],
+                    "to": repl["to"],
+                    "expected_hits": repl["expected_hits"],
+                    "actual_hits": hit,
+                }
+            )
+        details.append(
+            {
+                "path": str(path),
+                "replacement_counts": file_counts,
+                "contextual_replacement_counts": contextual_counts,
+            }
+        )
 
     dynamic_status = inspect_dynamic_market_target(manifest, cursor_app_override)
     dynamic_status["enabled"] = enable_dynamic_market
@@ -1684,16 +1914,14 @@ def apply_manifest(
             backup_path.parent.mkdir(parents=True, exist_ok=True)
             write_text(backup_path, content)
 
-            replacement_hits = 0
-            for repl in file_item.get("replacements", []):
-                count = content.count(repl["from"])
-                if count <= 0:
-                    continue
-                replacement_hits += count
-                content = content.replace(repl["from"], repl["to"])
-            if replacement_hits > 0:
+            content, replacement_hits = apply_replacements_to_content(content, file_item.get("replacements", []))
+            content, contextual_hits = apply_replacements_to_content(
+                content, file_item.get("contextual_replacements", [])
+            )
+            total_hits = replacement_hits + contextual_hits
+            if total_hits > 0:
                 write_text(path, content)
-                record_changed_file(changed_files, path, backup_path, replacement_hits)
+                record_changed_file(changed_files, path, backup_path, total_hits)
 
         dynamic_status = {
             "enabled": enable_dynamic_market,
@@ -2561,6 +2789,7 @@ def _cmd_scan(args: argparse.Namespace) -> int:
         f"[scan] 已扫描 {report['summary']['target_files']} 个文件，"
         f"静态命中短语 {report['summary']['static_distinct_hit_phrases']} 个，"
         f"静态总命中 {report['summary']['static_total_phrase_hits']} 次，"
+        f"核心残留提升 {report['summary']['promoted_core_phrase_items']} 项，"
         f"动态候选文本 {report['summary']['dynamic_candidate_literals']} 条。"
     )
     return 0
@@ -2747,7 +2976,7 @@ def _cmd_export_store_extension(args: argparse.Namespace) -> int:
         version=args.version,
     )
     print(
-        f"[export-store-extension] 已导出到 {report['output_dir']}，"
+        f"[export-store-extension] 实验性覆盖层已导出到 {report['output_dir']}，"
         f"目标扩展 {report['summary']['target_extensions']} 个，"
         f"生成本地化 {report['summary']['localized_extensions']} 个，"
         f"翻译键 {report['summary']['translated_keys']} 个，"
@@ -2798,46 +3027,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_upgrade.add_argument("--threshold", type=float, default=98.0, help="覆盖率阈值（默认 98）")
     p_upgrade.set_defaults(func=_cmd_upgrade)
 
-    p_auto_heal = sub.add_parser("auto-heal", help="检测 Cursor 更新并自动重打汉化补丁")
-    p_auto_heal.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
-    p_auto_heal.add_argument("--threshold", type=float, default=98.0, help="预检阈值记录值（默认 98）")
-    p_auto_heal.add_argument("--state-file", help="auto-heal 状态文件路径")
-    p_auto_heal.add_argument("--log-file", help="auto-heal 结构化日志路径")
-    p_auto_heal.add_argument(
-        "--enable-dynamic-market",
-        action="store_true",
-        help="自动修复时同时尝试注入插件市场动态简介补丁",
-    )
-    p_auto_heal.set_defaults(func=_cmd_auto_heal)
-
-    p_install_auto_heal = sub.add_parser("install-auto-heal", help="安装 macOS LaunchAgent 自动续打任务")
-    p_install_auto_heal.add_argument("--cursor-app", default=str(DEFAULT_CURSOR_APP), help="Cursor.app/Contents/Resources/app 目录")
-    p_install_auto_heal.add_argument("--interval-minutes", type=int, default=10, help="轮询间隔分钟数（默认 10）")
-    p_install_auto_heal.add_argument("--threshold", type=float, default=98.0, help="预检阈值记录值（默认 98）")
-    p_install_auto_heal.add_argument("--state-file", help="auto-heal 状态文件路径")
-    p_install_auto_heal.add_argument("--stdout-log", help="标准输出日志路径")
-    p_install_auto_heal.add_argument("--stderr-log", help="标准错误日志路径")
-    p_install_auto_heal.add_argument(
-        "--enable-dynamic-market",
-        action="store_true",
-        help="自动修复时同时尝试注入插件市场动态简介补丁",
-    )
-    p_install_auto_heal.set_defaults(func=_cmd_install_auto_heal)
-
-    p_uninstall_auto_heal = sub.add_parser("uninstall-auto-heal", help="卸载 macOS LaunchAgent 自动续打任务")
-    p_uninstall_auto_heal.add_argument("--plist-path", help="LaunchAgent plist 路径")
-    p_uninstall_auto_heal.set_defaults(func=_cmd_uninstall_auto_heal)
-
-    p_status_auto_heal = sub.add_parser("status-auto-heal", help="查看自动续打任务状态")
-    p_status_auto_heal.add_argument("--plist-path", help="LaunchAgent plist 路径")
-    p_status_auto_heal.add_argument("--state-file", help="auto-heal 状态文件路径")
-    p_status_auto_heal.add_argument("--stdout-log", help="标准输出日志路径")
-    p_status_auto_heal.add_argument("--stderr-log", help="标准错误日志路径")
-    p_status_auto_heal.set_defaults(func=_cmd_status_auto_heal)
-
-    p_export_store = sub.add_parser("export-store-extension", help="导出 Open VSX / Cursor 商店版语言包扩展")
+    p_export_store = sub.add_parser("export-store-extension", help="导出实验性私有扩展汉化覆盖层")
     p_export_store.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
-    p_export_store.add_argument("--output-dir", help="导出目录，默认 ./beta-cursor-hanhua")
+    p_export_store.add_argument("--output-dir", help="导出目录，默认 ./beta-cursor-private-zh-overlay")
     p_export_store.add_argument("--publisher", default="beta-cursor", help="扩展发布者 / Open VSX namespace")
     p_export_store.add_argument("--version", default="0.2.0", help="扩展版本号")
     p_export_store.set_defaults(func=_cmd_export_store_extension)
