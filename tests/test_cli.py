@@ -3,16 +3,20 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+import unittest.mock as mock
 from pathlib import Path
 
 from cursor_zh.cli import (
+    AUTO_HEAL_LABEL,
     CursorContext,
     apply_manifest,
+    build_auto_heal_launch_agent_plist,
     collect_product_checksum_updates,
     collect_qa_issues,
     dry_run_apply,
     disable_integrity_service,
     read_text,
+    run_auto_heal,
     run_build,
     run_export_local_bundle,
     run_export_store_extension,
@@ -27,6 +31,257 @@ from cursor_zh.cli import (
 
 
 class CursorZhTests(unittest.TestCase):
+    def _make_auto_heal_app(self, root: Path, version: str, commit: str, *, workbench_text: str = "const demo = 1;\n") -> CursorContext:
+        app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+        nls = app / "out" / "nls.messages.json"
+        workbench = app / "out" / "vs" / "workbench" / "workbench.desktop.main.js"
+        nls.parent.mkdir(parents=True, exist_ok=True)
+        workbench.parent.mkdir(parents=True, exist_ok=True)
+        nls.write_text('"Hello"\n', encoding="utf-8")
+        workbench.write_text(workbench_text, encoding="utf-8")
+        write_json(app / "product.json", {"commit": commit, "checksums": {}})
+        write_json(app / "package.json", {"version": version})
+        return CursorContext(
+            app_path=app,
+            package_path=app / "package.json",
+            product_path=app / "product.json",
+            version=version,
+            commit=commit,
+            lang_pack_path=None,
+        )
+
+    def _set_fake_auto_heal_data(self, root: Path) -> tuple[Path, Path]:
+        import cursor_zh.cli as mod
+
+        old_data_dir = mod.DATA_DIR
+        fake_data = root / "data"
+        (fake_data / "translations").mkdir(parents=True, exist_ok=True)
+        (fake_data / "coverage").mkdir(parents=True, exist_ok=True)
+        (fake_data / "glossary").mkdir(parents=True, exist_ok=True)
+        write_json(fake_data / "translations" / "custom_phrases.json", {"Hello": "你好"})
+        write_json(fake_data / "translations" / "dynamic_market_phrases.json", {"Published by": "发布者"})
+        write_json(fake_data / "coverage" / "core_phrases.json", [])
+        write_json(fake_data / "glossary" / "forced_terms.json", {})
+        write_json(fake_data / "glossary" / "keep_english_terms.json", [])
+        write_json(fake_data / "glossary" / "forbidden_terms.json", [])
+        mod.DATA_DIR = fake_data
+        return old_data_dir, fake_data
+
+    def test_auto_heal_skips_when_current_version_already_successful(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = self._make_auto_heal_app(root, "2.6.22", "c6285fea")
+            state_path = root / ".cursor_zh_state" / "auto_heal_status.json"
+            write_json(
+                state_path,
+                {
+                    "last_success": {"version": "2.6.22", "commit": "c6285fea"},
+                    "last_result": {"status": "applied"},
+                },
+            )
+
+            result = run_auto_heal(ctx, threshold=98.0, state_file=state_path)
+
+            self.assertEqual(result["status"], "noop")
+            self.assertFalse(result["changed"])
+            self.assertEqual(result["from_version"], "2.6.22")
+            self.assertEqual(result["to_version"], "2.6.22")
+            self.assertIsNone(result["apply_result"])
+
+    def test_auto_heal_applies_when_version_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = self._make_auto_heal_app(root, "2.6.22", "c6285fea")
+            state_path = root / ".cursor_zh_state" / "auto_heal_status.json"
+            old_data_dir, _ = self._set_fake_auto_heal_data(root)
+
+            try:
+                write_json(
+                    state_path,
+                    {
+                        "last_success": {"version": "2.6.21", "commit": "fea2f546"},
+                    },
+                )
+
+                import cursor_zh.cli as mod
+
+                with mock.patch.object(mod, "is_cursor_running", return_value=False):
+                    result = run_auto_heal(
+                        ctx,
+                        threshold=98.0,
+                        enable_dynamic_market=False,
+                        state_file=state_path,
+                    )
+
+                self.assertEqual(result["status"], "applied")
+                self.assertTrue(result["changed"])
+                self.assertEqual(result["manifest_items"], 1)
+                self.assertIsNotNone(result["apply_result"])
+                self.assertIn("你好", read_text(ctx.app_path / "out" / "nls.messages.json"))
+
+                state = json.loads(state_path.read_text(encoding="utf-8"))
+                self.assertEqual(state["last_success"]["version"], "2.6.22")
+                self.assertEqual(state["last_success"]["commit"], "c6285fea")
+            finally:
+                import cursor_zh.cli as mod
+
+                mod.DATA_DIR = old_data_dir
+
+    def test_auto_heal_rejects_on_checksum_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = self._make_auto_heal_app(root, "2.6.22", "c6285fea")
+            state_path = root / ".cursor_zh_state" / "auto_heal_status.json"
+            old_data_dir, _ = self._set_fake_auto_heal_data(root)
+
+            try:
+                write_json(
+                    state_path,
+                    {
+                        "last_success": {"version": "2.6.21", "commit": "fea2f546"},
+                    },
+                )
+
+                import cursor_zh.cli as mod
+
+                preview = {
+                    "generated_at": "now",
+                    "summary": {
+                        "missing_files": 0,
+                        "checksum_mismatch": 1,
+                        "total_replacements_preview": 1,
+                        "dynamic_market_patch": "anchor_missing",
+                        "integrity_patch": "not_found",
+                    },
+                    "missing_files": [],
+                    "checksum_mismatch": [str(ctx.app_path / "out" / "nls.messages.json")],
+                    "details": [],
+                    "dynamic_market_patch": {
+                        "enabled": True,
+                        "target_path": str(ctx.app_path / "out" / "vs" / "workbench" / "workbench.desktop.main.js"),
+                        "applied": False,
+                        "reason": "anchor_missing",
+                        "anchor_ok": False,
+                        "marker_present": False,
+                        "phrase_pairs": 1,
+                    },
+                    "integrity_patch": {
+                        "target_path": str(ctx.app_path / "out" / "vs" / "workbench" / "workbench.desktop.main.js"),
+                        "applied": False,
+                        "reason": "not_found",
+                    },
+                }
+
+                with (
+                    mock.patch.object(mod, "is_cursor_running", return_value=False),
+                    mock.patch.object(mod, "dry_run_apply", return_value=preview),
+                ):
+                    result = run_auto_heal(
+                        ctx,
+                        threshold=98.0,
+                        enable_dynamic_market=True,
+                        state_file=state_path,
+                    )
+
+                self.assertEqual(result["status"], "blocked")
+                self.assertEqual(result["failure_reason"], "checksum_mismatch")
+                self.assertIsNone(result["apply_result"])
+                self.assertIn('"Hello"', read_text(ctx.app_path / "out" / "nls.messages.json"))
+            finally:
+                import cursor_zh.cli as mod
+
+                mod.DATA_DIR = old_data_dir
+
+    def test_auto_heal_skips_when_cursor_is_running(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = self._make_auto_heal_app(root, "2.6.22", "c6285fea")
+            state_path = root / ".cursor_zh_state" / "auto_heal_status.json"
+            old_data_dir, _ = self._set_fake_auto_heal_data(root)
+
+            try:
+                write_json(
+                    state_path,
+                    {
+                        "last_success": {"version": "2.6.21", "commit": "fea2f546"},
+                    },
+                )
+
+                import cursor_zh.cli as mod
+
+                with mock.patch.object(mod, "is_cursor_running", return_value=True):
+                    result = run_auto_heal(
+                        ctx,
+                        threshold=98.0,
+                        enable_dynamic_market=False,
+                        state_file=state_path,
+                    )
+
+                self.assertEqual(result["status"], "pending")
+                self.assertEqual(result["failure_reason"], "cursor_running")
+                self.assertIsNone(result["apply_result"])
+                self.assertIn('"Hello"', read_text(ctx.app_path / "out" / "nls.messages.json"))
+            finally:
+                import cursor_zh.cli as mod
+
+                mod.DATA_DIR = old_data_dir
+
+    def test_auto_heal_allows_missing_dynamic_market_anchor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ctx = self._make_auto_heal_app(root, "2.6.22", "c6285fea", workbench_text="const demo = 1;\n")
+            state_path = root / ".cursor_zh_state" / "auto_heal_status.json"
+            old_data_dir, _ = self._set_fake_auto_heal_data(root)
+
+            try:
+                write_json(
+                    state_path,
+                    {
+                        "last_success": {"version": "2.6.21", "commit": "fea2f546"},
+                    },
+                )
+
+                import cursor_zh.cli as mod
+
+                with mock.patch.object(mod, "is_cursor_running", return_value=False):
+                    result = run_auto_heal(
+                        ctx,
+                        threshold=98.0,
+                        enable_dynamic_market=True,
+                        state_file=state_path,
+                    )
+
+                self.assertEqual(result["status"], "applied")
+                self.assertEqual(result["dynamic_market_patch"]["reason"], "anchor_missing")
+                self.assertIn("你好", read_text(ctx.app_path / "out" / "nls.messages.json"))
+            finally:
+                import cursor_zh.cli as mod
+
+                mod.DATA_DIR = old_data_dir
+
+    def test_build_auto_heal_launch_agent_plist_uses_repo_paths(self) -> None:
+        plist_text = build_auto_heal_launch_agent_plist(
+            label=AUTO_HEAL_LABEL,
+            python_bin="/usr/bin/python3",
+            repo_root=Path("/tmp/repo"),
+            cursor_app=Path("/Applications/Cursor.app/Contents/Resources/app"),
+            interval_minutes=10,
+            threshold=98.0,
+            enable_dynamic_market=True,
+            state_file=Path("/tmp/repo/.cursor_zh_state/auto_heal_status.json"),
+            stdout_log=Path("/tmp/repo/artifacts/logs/auto-heal.log"),
+            stderr_log=Path("/tmp/repo/artifacts/logs/auto-heal.err.log"),
+        )
+
+        self.assertIn("<string>com.beta.cursor-zh.auto-heal</string>", plist_text)
+        self.assertIn("<string>/usr/bin/python3</string>", plist_text)
+        self.assertIn("<string>-m</string>", plist_text)
+        self.assertIn("<string>cursor_zh</string>", plist_text)
+        self.assertIn("<string>auto-heal</string>", plist_text)
+        self.assertIn("<integer>600</integer>", plist_text)
+        self.assertIn("<string>/tmp/repo</string>", plist_text)
+        self.assertIn("<string>/tmp/repo/artifacts/logs/auto-heal.log</string>", plist_text)
+
     def test_build_skips_blocked_main_process_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -700,12 +955,19 @@ class CursorZhTests(unittest.TestCase):
                 self.assertEqual(report["summary"]["blocked_extensions"], 0)
                 package_json = json.loads((output_dir / "package.json").read_text(encoding="utf-8"))
                 self.assertEqual(package_json["displayName"], "Beta-Cursor-汉化")
+                self.assertEqual(package_json["version"], "0.1.0")
                 self.assertEqual(package_json["extensionDependencies"], ["MS-CEINTL.vscode-language-pack-zh-hans"])
                 self.assertEqual(package_json["icon"], "media/icon.png")
                 self.assertTrue((output_dir / "media" / "icon.png").exists())
                 self.assertTrue((output_dir / "LICENSE").exists())
                 self.assertTrue((output_dir / "scripts" / "package-openvsx.sh").exists())
                 self.assertTrue((output_dir / "scripts" / "publish-openvsx.sh").exists())
+                readme = (output_dir / "README.md").read_text(encoding="utf-8")
+                self.assertIn("当前导出基于 Cursor `2.6.18`", readme)
+                self.assertIn("`--version 0.1.0`", readme)
+                changelog = (output_dir / "CHANGELOG.md").read_text(encoding="utf-8")
+                self.assertIn("## 0.1.0", changelog)
+                self.assertIn("适配 Cursor 2.6.18", changelog)
 
                 translation = json.loads(
                     (output_dir / "translations" / "extensions" / "anysphere.cursor-demo.i18n.json").read_text(
@@ -769,6 +1031,9 @@ class CursorZhTests(unittest.TestCase):
                 self.assertEqual(report["summary"]["localized_extensions"], 1)
                 self.assertEqual(report["summary"]["blocked_extensions"], 1)
                 self.assertEqual(report["blocked_targets"][0]["extension_id"], "anysphere.cursor-blocked")
+                readme = (root / "beta-cursor-hanhua" / "README.md").read_text(encoding="utf-8")
+                self.assertIn("当前导出基于 Cursor `2.6.18`", readme)
+                self.assertIn("`--version 0.1.0`", readme)
             finally:
                 mod.DATA_DIR = old_data_dir
                 mod.STORE_EXTENSION_OVERRIDES_PATH = old_overrides_path
