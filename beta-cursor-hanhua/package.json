@@ -2,7 +2,7 @@
   "name": "beta-cursor-hanhua",
   "displayName": "Beta-Cursor-汉化",
   "description": "Chinese localization overlay for Cursor private extensions. 补充 Cursor 私有扩展简体中文界面。",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "beta-cursor",
   "license": "MIT",
   "icon": "media/icon.png",

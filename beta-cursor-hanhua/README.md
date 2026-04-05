@@ -10,11 +10,11 @@
 
 ## 当前生成信息
 
-- 目标 Cursor 版本: `2.6.21`
-- 目标提交哈希: `fea2f546c979a0a4ad1deab23552a43568807590`
+- 目标 Cursor 版本: `3.0.12`
+- 目标提交哈希: `a80ff7dfcaa45d7750f6e30be457261379c29b00`
 - 扩展名: `beta-cursor-hanhua`
 - 已生成本地化目标: `3` 个
-- 无法导出到商店语言包的 Cursor 内置扩展: `11` 个
+- 无法导出到商店语言包的 Cursor 内置扩展: `15` 个
 
 ## 已覆盖的 Cursor 内置扩展
 
@@ -26,7 +26,7 @@
 
 - 这是标准 VSIX 语言包扩展，不限定 macOS / Windows / Linux。
 - 只要对应版本的 Cursor 在各平台上使用相同的私有扩展 ID 与本地化键，这个包就可复用。
-- 当前导出基于 Cursor `2.6.21`，如后续版本变更了扩展 ID 或键名，请先重新执行导出。
+- 当前导出基于 Cursor `3.0.12`，如后续版本变更了扩展 ID 或键名，请先重新执行导出。
 
 ## 安装方式
 
@@ -36,15 +36,19 @@
 
 ## 当前无法直接做成商店语言包的内置扩展
 
+- `anysphere.cursor-agent`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-agent-exec`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `cursor.cursor-browser-automation`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-checkout`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-commits`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-deeplink`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-explorer`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-file-service`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-mcp`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-ndjson-ingest`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-polyfills-remote`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-resolver`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-resolver-helper`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `anysphere.cursor-socket`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 - `everysphere.worktree-textmate`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 
@@ -57,7 +61,7 @@
 可选参数：
 
 - `--publisher your-openvsx-namespace`
-- `--version 0.1.1`
+- `--version 0.2.0`
 - `--output-dir ./beta-cursor-hanhua`
 
 ## 打包与发布
