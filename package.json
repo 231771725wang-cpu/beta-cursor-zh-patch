@@ -1,0 +1,64 @@
+{
+  "name": "beta-cursor-hanhua",
+  "displayName": "Beta-Cursor-汉化",
+  "description": "Chinese localization overlay for Cursor private extensions. 补充 Cursor 私有扩展简体中文界面。",
+  "version": "0.2.0",
+  "publisher": "beta-cursor",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Language Packs"
+  ],
+  "keywords": [
+    "cursor",
+    "chinese",
+    "zh-cn",
+    "language pack",
+    "hanhua"
+  ],
+  "galleryBanner": {
+    "color": "#0b1836",
+    "theme": "dark"
+  },
+  "files": [
+    "media/**",
+    "translations/**",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "package.json"
+  ],
+  "scripts": {
+    "package:openvsx": "bash ./scripts/package-openvsx.sh",
+    "publish:openvsx": "bash ./scripts/publish-openvsx.sh"
+  },
+  "extensionDependencies": [
+    "MS-CEINTL.vscode-language-pack-zh-hans"
+  ],
+  "contributes": {
+    "localizations": [
+      {
+        "languageId": "zh-cn",
+        "languageName": "Chinese Simplified",
+        "localizedLanguageName": "中文(简体)",
+        "translations": [
+          {
+            "id": "anysphere.cursor-always-local",
+            "path": "./translations/extensions/anysphere.cursor-always-local.i18n.json"
+          },
+          {
+            "id": "anysphere.cursor-retrieval",
+            "path": "./translations/extensions/anysphere.cursor-retrieval.i18n.json"
+          },
+          {
+            "id": "anysphere.cursor-shadow-workspace",
+            "path": "./translations/extensions/anysphere.cursor-shadow-workspace.i18n.json"
+          }
+        ]
+      }
+    ]
+  }
+}
