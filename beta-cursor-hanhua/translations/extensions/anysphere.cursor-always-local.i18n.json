@@ -1,0 +1,9 @@
+{
+  "version": "1.0.0",
+  "contents": {
+    "package": {
+      "displayName": "Cursor 始终本地",
+      "description": "Cursor 的实验功能集合。"
+    }
+  }
+}

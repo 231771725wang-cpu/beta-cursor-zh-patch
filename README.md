@@ -1,8 +1,6 @@
 # Beta Cursor 中文完整本地化方案
 
-[![Release](https://img.shields.io/github/v/release/231771725wang-cpu/beta-cursor-zh-patch?label=Release)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases)
-[![License](https://img.shields.io/github/license/231771725wang-cpu/beta-cursor-zh-patch?label=License)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/blob/main/LICENSE)
-[![Actions](https://img.shields.io/github/actions/workflow/status/231771725wang-cpu/beta-cursor-zh-patch/cross-platform-smoke.yml?label=Smoke%20Test)](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/actions/workflows/cross-platform-smoke.yml)
+面向 Cursor 的商店安全版汉化增强扩展，优先补足官方简体中文语言包尚未覆盖的 Cursor 私有扩展文案。
 
 这不是一个“给官方语言包打补丁”的附属项目，而是一套面向 Cursor Beta 的独立完整本地化方案。
 
@@ -10,7 +8,9 @@
 
 如果你要的是一个可安装、可回滚、可导出、可分发、可长期维护的中文主方案，而不是一层依附官方语言包的零散补丁，这个仓库就是为那件事做的。
 
-本仓库只包含补丁脚本、翻译数据和说明，不包含 Cursor 原始安装包或官方资源备份文件。
+- 依赖官方简体中文语言包，补充 Cursor 自带私有扩展里已暴露到 `package.nls.json` 的文案。
+- 不修改 Cursor.app 主程序文件，适合打包为 VSIX 并发布到 Open VSX / Cursor 扩展发现链路。
+- 不覆盖 `workbench.desktop.main.js` 里的硬编码文案；这部分仍需仓库根目录的 `cursor-zh apply` 补丁链处理。
 
 ## 亮点
 
@@ -20,52 +20,72 @@
 
 ## 截图对比
 
-### General / 通用
+- 目标 Cursor 版本: `3.0.12`
+- 目标提交哈希: `a80ff7dfcaa45d7750f6e30be457261379c29b00`
+- 扩展名: `beta-cursor-hanhua`
+- 已生成本地化目标: `3` 个
+- 无法导出到商店语言包的 Cursor 内置扩展: `15` 个
 
-| Before | After |
-| --- | --- |
-| ![Before General](assets/screenshots/before-general.png) | ![After General](assets/screenshots/after-general.png) |
+## 已覆盖的 Cursor 内置扩展
 
-### Agents / 智能体
+- `anysphere.cursor-always-local`: 2 个键
+- `anysphere.cursor-retrieval`: 2 个键
+- `anysphere.cursor-shadow-workspace`: 2 个键
 
-| Before | After |
-| --- | --- |
-| ![Before Agents](assets/screenshots/before-agents.png) | ![After Agents](assets/screenshots/after-agents.png) |
+## 兼容性
 
-### Rules, Skills, Subagents / 规则、技能、子智能体
+- 这是标准 VSIX 语言包扩展，不限定 macOS / Windows / Linux。
+- 只要对应版本的 Cursor 在各平台上使用相同的私有扩展 ID 与本地化键，这个包就可复用。
+- 当前导出基于 Cursor `3.0.12`，如后续版本变更了扩展 ID 或键名，请先重新执行导出。
 
-| Before | After |
-| --- | --- |
-| ![Before Rules, Skills, Subagents](assets/screenshots/before-rules-skills-subagents.png) | ![After Rules, Skills, Subagents](assets/screenshots/after-rules-skills-subagents.png) |
+## 安装方式
 
-## 当前状态
+1. 在 Cursor 中先安装官方简体中文语言包 `MS-CEINTL.vscode-language-pack-zh-hans`。
+2. 安装本扩展的 `.vsix`，然后重载 Cursor。
+3. 若仍有未汉化区域，属于 Cursor 主程序硬编码文案，请配合本仓库根目录的完整补丁版使用。
 
 - macOS（Apple Silicon）已验证可用
 - Windows 已补充启动器与 GitHub Actions 脚本级冒烟验证，但暂未做作者本人实机长时间验证
 - 仓库默认附带 macOS 与 Windows 两套安装/回滚入口
 - `export-local-bundle` 是主分发路径；`export-store-extension` 仅保留为实验性附属产物
 
-## 安装
+- `anysphere.cursor-agent`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-agent-exec`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `cursor.cursor-browser-automation`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-checkout`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-commits`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-deeplink`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-explorer`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-file-service`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-mcp`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-ndjson-ingest`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-polyfills-remote`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-resolver`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-resolver-helper`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `anysphere.cursor-socket`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
+- `everysphere.worktree-textmate`: 缺少 `package.nls.json`，只能靠本地补丁或上游改造
 
-详细说明见 [使用说明.txt](使用说明.txt)。
-
-### macOS
-
-1. 下载或克隆仓库后，先把目录移到 `~/work`、`~/Applications` 或其他非“桌面/下载/文稿”位置。
-2. 进入 `macOS/`，运行 `安装.command`。
-3. 如遇到 Gatekeeper 提示，可先执行：
+## 重新生成
 
 ```bash
-xattr -dr com.apple.quarantine "<仓库目录>"
+./cursor-zh export-store-extension
 ```
 
-4. 如需手动指定 Cursor 路径，可运行：
+可选参数：
+
+- `--publisher your-openvsx-namespace`
+- `--version 0.2.0`
+- `--output-dir ./beta-cursor-hanhua`
+
+## 打包与发布
 
 ```bash
-./macOS/安装.command /Applications/Cursor.app
+cd beta-cursor-hanhua
+./scripts/package-openvsx.sh
+OPEN_VSX_TOKEN=xxxx ./scripts/publish-openvsx.sh
 ```
 
-### Windows
+## 边界说明
 
 1. 进入 `Windows/`，运行 `安装.bat`。
 2. 默认会尝试查找：

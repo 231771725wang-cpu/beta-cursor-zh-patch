@@ -1,7 +1,11 @@
-.DS_Store
+.cursor_zh_state/
+artifacts/
 __pycache__/
-*.pyc
-*.pyo
-
-payload/artifacts/
-payload/.cursor_zh_state/
+.pytest_cache/
+.DS_Store
+.playwright-cli/
+.npm-cache/
+*.app
+*.dmg
+*.zip
+*.vsix
