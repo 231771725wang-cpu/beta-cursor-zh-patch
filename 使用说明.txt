@@ -1,4 +1,4 @@
-# Beta-Cursor-全面汉化-2.6.19-224838f9
+# Beta-Cursor-全面汉化-3.0.12-a80ff7df
 
 这是一个可在另一台电脑上复现的 Cursor 汉化本地补丁包，包含 macOS 与 Windows 启动器。
 
