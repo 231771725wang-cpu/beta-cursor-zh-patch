@@ -6,8 +6,11 @@ import base64
 import datetime as dt
 import hashlib
 import json
+import os
+import plistlib
 import re
 import shutil
+import subprocess
 import sys
 import zipfile
 import zlib
@@ -29,10 +32,16 @@ COVERAGE_DIR = ARTIFACTS_DIR / "coverage_report"
 UPGRADE_DIR = ARTIFACTS_DIR / "upgrade"
 STORE_EXTENSION_ARTIFACTS_DIR = ARTIFACTS_DIR / "store_extension"
 LOCAL_BUNDLE_DIR = ARTIFACTS_DIR / "local_bundle"
+LOGS_DIR = ARTIFACTS_DIR / "logs"
 
 DEFAULT_CURSOR_APP = Path("/Applications/Cursor.app/Contents/Resources/app")
 DEFAULT_LANG_EXT_ROOT = Path.home() / ".cursor" / "extensions"
 STORE_EXTENSION_OVERRIDES_PATH = DATA_DIR / "translations" / "store_extension_overrides.json"
+AUTO_HEAL_STATUS_PATH = STATE_DIR / "auto_heal_status.json"
+AUTO_HEAL_LOG_PATH = LOGS_DIR / "auto-heal.log"
+AUTO_HEAL_ERR_LOG_PATH = LOGS_DIR / "auto-heal.err.log"
+AUTO_HEAL_LABEL = "com.beta.cursor-zh.auto-heal"
+AUTO_HEAL_LAUNCH_AGENT_PATH = Path.home() / "Library" / "LaunchAgents" / f"{AUTO_HEAL_LABEL}.plist"
 
 PH_RE = re.compile(r"\{[0-9]+\}")
 EN_RE = re.compile(r"[A-Za-z][A-Za-z0-9&/().,:;'\-+ ]{2,}")
@@ -78,6 +87,7 @@ def ensure_dirs() -> None:
         UPGRADE_DIR,
         STORE_EXTENSION_ARTIFACTS_DIR,
         LOCAL_BUNDLE_DIR,
+        LOGS_DIR,
     ):
         path.mkdir(parents=True, exist_ok=True)
 
@@ -249,6 +259,7 @@ def build_store_extension_readme(
     report: dict[str, Any],
     package_name: str,
     package_display_name: str,
+    version: str,
 ) -> str:
     translated_targets = [item for item in report["targets"] if item["translated_keys"] > 0]
     blocked_targets = report.get("blocked_targets", [])
@@ -286,7 +297,7 @@ def build_store_extension_readme(
             "",
             "- 这是标准 VSIX 语言包扩展，不限定 macOS / Windows / Linux。",
             "- 只要对应版本的 Cursor 在各平台上使用相同的私有扩展 ID 与本地化键，这个包就可复用。",
-            "- 当前导出基于 Cursor `2.6.18`，如后续版本变更了扩展 ID 或键名，请先重新执行导出。",
+            f"- 当前导出基于 Cursor `{ctx.version}`，如后续版本变更了扩展 ID 或键名，请先重新执行导出。",
             "",
             "## 安装方式",
             "",
@@ -315,7 +326,7 @@ def build_store_extension_readme(
             "可选参数：",
             "",
             "- `--publisher your-openvsx-namespace`",
-            "- `--version 0.1.0`",
+            f"- `--version {version}`",
             "- `--output-dir ./beta-cursor-hanhua`",
             "",
             "## 打包与发布",
@@ -337,6 +348,20 @@ def build_store_extension_readme(
         ]
     )
     return "\n".join(lines)
+
+
+def build_store_extension_changelog(ctx: CursorContext, version: str) -> str:
+    return "\n".join(
+        [
+            "# Changelog",
+            "",
+            f"## {version}",
+            "",
+            f"- 更新商店安全版导出，适配 Cursor {ctx.version}。",
+            "- 依赖官方简体中文语言包，补充 Cursor 私有扩展的商店安全版汉化。",
+            "",
+        ]
+    )
 
 
 def write_store_extension_package(
@@ -484,22 +509,10 @@ def run_export_store_extension(
             report={"targets": report_targets, "blocked_targets": blocked_targets},
             package_name=package_name,
             package_display_name=package_display_name,
+            version=version,
         ),
     )
-    write_text(
-        output_root / "CHANGELOG.md",
-        "\n".join(
-            [
-                "# Changelog",
-                "",
-                "## 0.1.0",
-                "",
-                f"- 初始导出，适配 Cursor {ctx.version}。",
-                "- 依赖官方简体中文语言包，补充 Cursor 私有扩展的商店安全版汉化。",
-                "",
-            ]
-        ),
-    )
+    write_text(output_root / "CHANGELOG.md", build_store_extension_changelog(ctx, version))
 
     report = {
         "generated_at": now_iso(),
@@ -1939,6 +1952,305 @@ def run_rollback(last_apply: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def load_state_file(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        data = read_json(path)
+    except Exception:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def append_log_line(path: Path | None, line: str) -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(line.rstrip("\n") + "\n")
+
+
+def current_cursor_signature(ctx: CursorContext) -> dict[str, str]:
+    return {
+        "version": ctx.version,
+        "commit": ctx.commit,
+    }
+
+
+def is_cursor_running() -> bool:
+    try:
+        result = subprocess.run(
+            ["pgrep", "-x", "Cursor"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return False
+    return result.returncode == 0
+
+
+def build_auto_heal_launch_agent_plist(
+    *,
+    label: str,
+    python_bin: str,
+    repo_root: Path,
+    cursor_app: Path,
+    interval_minutes: int,
+    threshold: float,
+    enable_dynamic_market: bool,
+    state_file: Path,
+    stdout_log: Path,
+    stderr_log: Path,
+) -> str:
+    program_arguments = [
+        python_bin,
+        "-m",
+        "cursor_zh",
+        "auto-heal",
+        "--cursor-app",
+        str(cursor_app),
+        "--threshold",
+        format(threshold, "g"),
+        "--state-file",
+        str(state_file),
+        "--log-file",
+        str(stdout_log),
+    ]
+    if enable_dynamic_market:
+        program_arguments.append("--enable-dynamic-market")
+
+    payload = {
+        "Label": label,
+        "ProgramArguments": program_arguments,
+        "WorkingDirectory": str(repo_root),
+        "EnvironmentVariables": {
+            "PYTHONPATH": str(repo_root),
+        },
+        "RunAtLoad": True,
+        "StartInterval": max(60, int(interval_minutes * 60)),
+        "StandardOutPath": str(stdout_log),
+        "StandardErrorPath": str(stderr_log),
+    }
+    return plistlib.dumps(payload, fmt=plistlib.FMT_XML).decode("utf-8")
+
+
+def auto_heal_blocker_reason(manifest: dict[str, Any], qa_report: dict[str, Any], preview: dict[str, Any]) -> str | None:
+    if manifest.get("summary", {}).get("untranslated_phrases_count", 0) > 0:
+        return "untranslated_phrases"
+    if qa_report.get("summary", {}).get("errors", 0) > 0:
+        return "qa_errors"
+    if preview.get("summary", {}).get("missing_files", 0) > 0:
+        return "missing_files"
+    if preview.get("summary", {}).get("checksum_mismatch", 0) > 0:
+        return "checksum_mismatch"
+    return None
+
+
+def run_auto_heal(
+    ctx: CursorContext,
+    threshold: float,
+    enable_dynamic_market: bool = False,
+    state_file: Path | None = None,
+    log_file: Path | None = None,
+) -> dict[str, Any]:
+    ensure_dirs()
+    state_path = state_file or AUTO_HEAL_STATUS_PATH
+    log_path = log_file or AUTO_HEAL_LOG_PATH
+    previous_state = load_state_file(state_path)
+    last_success = previous_state.get("last_success", {}) if isinstance(previous_state, dict) else {}
+    from_version = last_success.get("version")
+    from_commit = last_success.get("commit")
+    current_signature = current_cursor_signature(ctx)
+    changed = from_version != ctx.version or from_commit != ctx.commit
+
+    result: dict[str, Any] = {
+        "checked_at": now_iso(),
+        "status": "noop",
+        "changed": changed,
+        "from_version": from_version,
+        "from_commit": from_commit,
+        "to_version": ctx.version,
+        "to_commit": ctx.commit,
+        "threshold_percent": threshold,
+        "manifest_items": 0,
+        "apply_result": None,
+        "failure_reason": None,
+        "qa_summary": None,
+        "preview_summary": None,
+        "dynamic_market_patch": {
+            "enabled": enable_dynamic_market,
+            "reason": "disabled" if not enable_dynamic_market else "pending",
+        },
+    }
+
+    if not changed and from_version is not None and from_commit is not None:
+        state_payload = {
+            "checked_at": result["checked_at"],
+            "last_success": last_success,
+            "last_result": result,
+        }
+        write_json(state_path, state_payload)
+        append_log_line(log_path, json.dumps(result, ensure_ascii=False))
+        return result
+
+    if is_cursor_running():
+        result["status"] = "pending"
+        result["failure_reason"] = "cursor_running"
+        state_payload = {
+            "checked_at": result["checked_at"],
+            "last_success": last_success,
+            "last_result": result,
+        }
+        write_json(state_path, state_payload)
+        append_log_line(log_path, json.dumps(result, ensure_ascii=False))
+        return result
+
+    try:
+        scan_report = run_scan(ctx)
+        manifest = run_build(scan_report)
+        qa_report = run_qa(manifest)
+        preview = dry_run_apply(
+            manifest,
+            force=False,
+            enable_dynamic_market=enable_dynamic_market,
+            cursor_app_override=ctx.app_path,
+        )
+        result["manifest_items"] = manifest.get("summary", {}).get("replacement_items", 0)
+        result["qa_summary"] = qa_report.get("summary")
+        result["preview_summary"] = preview.get("summary")
+        result["dynamic_market_patch"] = preview.get(
+            "dynamic_market_patch",
+            {"enabled": enable_dynamic_market, "reason": "unknown"},
+        )
+
+        blocker = auto_heal_blocker_reason(manifest, qa_report, preview)
+        if blocker:
+            result["status"] = "blocked"
+            result["failure_reason"] = blocker
+        else:
+            timestamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+            backup_root = BACKUP_DIR / f"auto-heal-{timestamp}"
+            apply_result = apply_manifest(
+                manifest,
+                backup_root=backup_root,
+                force=False,
+                enable_dynamic_market=enable_dynamic_market,
+                cursor_app_override=ctx.app_path,
+            )
+            result["status"] = "applied"
+            result["apply_result"] = apply_result
+            result["dynamic_market_patch"] = apply_result.get("dynamic_market_patch", result["dynamic_market_patch"])
+            last_success = current_signature
+    except Exception as exc:
+        result["status"] = "failed"
+        result["failure_reason"] = str(exc)
+
+    state_payload = {
+        "checked_at": result["checked_at"],
+        "last_success": last_success,
+        "last_result": result,
+    }
+    write_json(state_path, state_payload)
+    append_log_line(log_path, json.dumps(result, ensure_ascii=False))
+    return result
+
+
+def run_launchctl(args: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["launchctl", *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def install_auto_heal_launch_agent(
+    *,
+    cursor_app: Path,
+    interval_minutes: int,
+    threshold: float,
+    enable_dynamic_market: bool,
+    state_file: Path,
+    stdout_log: Path,
+    stderr_log: Path,
+    plist_path: Path = AUTO_HEAL_LAUNCH_AGENT_PATH,
+) -> dict[str, Any]:
+    ensure_dirs()
+    plist_path.parent.mkdir(parents=True, exist_ok=True)
+    stdout_log.parent.mkdir(parents=True, exist_ok=True)
+    stderr_log.parent.mkdir(parents=True, exist_ok=True)
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    plist_text = build_auto_heal_launch_agent_plist(
+        label=AUTO_HEAL_LABEL,
+        python_bin=sys.executable,
+        repo_root=ROOT,
+        cursor_app=cursor_app,
+        interval_minutes=interval_minutes,
+        threshold=threshold,
+        enable_dynamic_market=enable_dynamic_market,
+        state_file=state_file,
+        stdout_log=stdout_log,
+        stderr_log=stderr_log,
+    )
+    write_text(plist_path, plist_text)
+
+    domain = f"gui/{os.getuid()}"
+    run_launchctl(["bootout", domain, str(plist_path)])
+    bootstrap = run_launchctl(["bootstrap", domain, str(plist_path)])
+    kickstart = run_launchctl(["kickstart", "-k", f"{domain}/{AUTO_HEAL_LABEL}"])
+
+    return {
+        "label": AUTO_HEAL_LABEL,
+        "plist_path": str(plist_path),
+        "state_file": str(state_file),
+        "stdout_log": str(stdout_log),
+        "stderr_log": str(stderr_log),
+        "bootstrap_code": bootstrap.returncode,
+        "kickstart_code": kickstart.returncode,
+    }
+
+
+def uninstall_auto_heal_launch_agent(plist_path: Path = AUTO_HEAL_LAUNCH_AGENT_PATH) -> dict[str, Any]:
+    domain = f"gui/{os.getuid()}"
+    if plist_path.exists():
+        run_launchctl(["bootout", domain, str(plist_path)])
+        plist_path.unlink()
+    return {
+        "label": AUTO_HEAL_LABEL,
+        "plist_path": str(plist_path),
+        "removed": not plist_path.exists(),
+    }
+
+
+def auto_heal_launch_agent_loaded(label: str = AUTO_HEAL_LABEL) -> bool:
+    domain = f"gui/{os.getuid()}/{label}"
+    try:
+        result = run_launchctl(["print", domain])
+    except FileNotFoundError:
+        return False
+    return result.returncode == 0
+
+
+def status_auto_heal_launch_agent(
+    *,
+    state_file: Path = AUTO_HEAL_STATUS_PATH,
+    plist_path: Path = AUTO_HEAL_LAUNCH_AGENT_PATH,
+    stdout_log: Path = AUTO_HEAL_LOG_PATH,
+    stderr_log: Path = AUTO_HEAL_ERR_LOG_PATH,
+) -> dict[str, Any]:
+    return {
+        "label": AUTO_HEAL_LABEL,
+        "installed": plist_path.exists(),
+        "loaded": auto_heal_launch_agent_loaded(),
+        "plist_path": str(plist_path),
+        "state_file": str(state_file),
+        "stdout_log": str(stdout_log),
+        "stderr_log": str(stderr_log),
+        "last_status": load_state_file(state_file),
+    }
+
+
 def run_upgrade(ctx: CursorContext, threshold: float) -> dict[str, Any]:
     prev_scan_path = STATE_DIR / "last_scan.json"
     prev_scan = None
@@ -2380,6 +2692,52 @@ def _cmd_upgrade(args: argparse.Namespace) -> int:
     return 2 if report["manual_review_required"] else 0
 
 
+def _cmd_auto_heal(args: argparse.Namespace) -> int:
+    ctx = detect_cursor_context(Path(args.cursor_app) if args.cursor_app else None)
+    report = run_auto_heal(
+        ctx,
+        threshold=args.threshold,
+        enable_dynamic_market=args.enable_dynamic_market,
+        state_file=Path(args.state_file) if args.state_file else None,
+        log_file=Path(args.log_file) if args.log_file else None,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report["status"] in {"noop", "applied", "pending"} else 2
+
+
+def _cmd_install_auto_heal(args: argparse.Namespace) -> int:
+    report = install_auto_heal_launch_agent(
+        cursor_app=Path(args.cursor_app) if args.cursor_app else DEFAULT_CURSOR_APP,
+        interval_minutes=args.interval_minutes,
+        threshold=args.threshold,
+        enable_dynamic_market=args.enable_dynamic_market,
+        state_file=Path(args.state_file) if args.state_file else AUTO_HEAL_STATUS_PATH,
+        stdout_log=Path(args.stdout_log) if args.stdout_log else AUTO_HEAL_LOG_PATH,
+        stderr_log=Path(args.stderr_log) if args.stderr_log else AUTO_HEAL_ERR_LOG_PATH,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report["bootstrap_code"] == 0 and report["kickstart_code"] == 0 else 2
+
+
+def _cmd_uninstall_auto_heal(args: argparse.Namespace) -> int:
+    report = uninstall_auto_heal_launch_agent(
+        plist_path=Path(args.plist_path) if args.plist_path else AUTO_HEAL_LAUNCH_AGENT_PATH,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0 if report["removed"] else 2
+
+
+def _cmd_status_auto_heal(args: argparse.Namespace) -> int:
+    report = status_auto_heal_launch_agent(
+        state_file=Path(args.state_file) if args.state_file else AUTO_HEAL_STATUS_PATH,
+        plist_path=Path(args.plist_path) if args.plist_path else AUTO_HEAL_LAUNCH_AGENT_PATH,
+        stdout_log=Path(args.stdout_log) if args.stdout_log else AUTO_HEAL_LOG_PATH,
+        stderr_log=Path(args.stderr_log) if args.stderr_log else AUTO_HEAL_ERR_LOG_PATH,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
 def _cmd_export_store_extension(args: argparse.Namespace) -> int:
     ctx = detect_cursor_context(Path(args.cursor_app) if args.cursor_app else None)
     report = run_export_store_extension(
@@ -2440,11 +2798,48 @@ def build_parser() -> argparse.ArgumentParser:
     p_upgrade.add_argument("--threshold", type=float, default=98.0, help="覆盖率阈值（默认 98）")
     p_upgrade.set_defaults(func=_cmd_upgrade)
 
+    p_auto_heal = sub.add_parser("auto-heal", help="检测 Cursor 更新并自动重打汉化补丁")
+    p_auto_heal.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
+    p_auto_heal.add_argument("--threshold", type=float, default=98.0, help="预检阈值记录值（默认 98）")
+    p_auto_heal.add_argument("--state-file", help="auto-heal 状态文件路径")
+    p_auto_heal.add_argument("--log-file", help="auto-heal 结构化日志路径")
+    p_auto_heal.add_argument(
+        "--enable-dynamic-market",
+        action="store_true",
+        help="自动修复时同时尝试注入插件市场动态简介补丁",
+    )
+    p_auto_heal.set_defaults(func=_cmd_auto_heal)
+
+    p_install_auto_heal = sub.add_parser("install-auto-heal", help="安装 macOS LaunchAgent 自动续打任务")
+    p_install_auto_heal.add_argument("--cursor-app", default=str(DEFAULT_CURSOR_APP), help="Cursor.app/Contents/Resources/app 目录")
+    p_install_auto_heal.add_argument("--interval-minutes", type=int, default=10, help="轮询间隔分钟数（默认 10）")
+    p_install_auto_heal.add_argument("--threshold", type=float, default=98.0, help="预检阈值记录值（默认 98）")
+    p_install_auto_heal.add_argument("--state-file", help="auto-heal 状态文件路径")
+    p_install_auto_heal.add_argument("--stdout-log", help="标准输出日志路径")
+    p_install_auto_heal.add_argument("--stderr-log", help="标准错误日志路径")
+    p_install_auto_heal.add_argument(
+        "--enable-dynamic-market",
+        action="store_true",
+        help="自动修复时同时尝试注入插件市场动态简介补丁",
+    )
+    p_install_auto_heal.set_defaults(func=_cmd_install_auto_heal)
+
+    p_uninstall_auto_heal = sub.add_parser("uninstall-auto-heal", help="卸载 macOS LaunchAgent 自动续打任务")
+    p_uninstall_auto_heal.add_argument("--plist-path", help="LaunchAgent plist 路径")
+    p_uninstall_auto_heal.set_defaults(func=_cmd_uninstall_auto_heal)
+
+    p_status_auto_heal = sub.add_parser("status-auto-heal", help="查看自动续打任务状态")
+    p_status_auto_heal.add_argument("--plist-path", help="LaunchAgent plist 路径")
+    p_status_auto_heal.add_argument("--state-file", help="auto-heal 状态文件路径")
+    p_status_auto_heal.add_argument("--stdout-log", help="标准输出日志路径")
+    p_status_auto_heal.add_argument("--stderr-log", help="标准错误日志路径")
+    p_status_auto_heal.set_defaults(func=_cmd_status_auto_heal)
+
     p_export_store = sub.add_parser("export-store-extension", help="导出 Open VSX / Cursor 商店版语言包扩展")
     p_export_store.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
     p_export_store.add_argument("--output-dir", help="导出目录，默认 ./beta-cursor-hanhua")
     p_export_store.add_argument("--publisher", default="beta-cursor", help="扩展发布者 / Open VSX namespace")
-    p_export_store.add_argument("--version", default="0.1.0", help="扩展版本号")
+    p_export_store.add_argument("--version", default="0.2.0", help="扩展版本号")
     p_export_store.set_defaults(func=_cmd_export_store_extension)
 
     p_export_local = sub.add_parser("export-local-bundle", help="导出可跨电脑一键复现的本地补丁包")
