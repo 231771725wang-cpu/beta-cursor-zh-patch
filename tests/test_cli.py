@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import unittest
 import unittest.mock as mock
@@ -954,9 +955,10 @@ class CursorZhTests(unittest.TestCase):
                 self.assertEqual(report["summary"]["localized_extensions"], 1)
                 self.assertEqual(report["summary"]["blocked_extensions"], 0)
                 package_json = json.loads((output_dir / "package.json").read_text(encoding="utf-8"))
-                self.assertEqual(package_json["displayName"], "Beta-Cursor-汉化")
+                self.assertEqual(package_json["displayName"], "Beta Cursor 私有扩展汉化覆盖层（实验）")
+                self.assertEqual(package_json["name"], "beta-cursor-hanhua")
                 self.assertEqual(package_json["version"], "0.1.0")
-                self.assertEqual(package_json["extensionDependencies"], ["MS-CEINTL.vscode-language-pack-zh-hans"])
+                self.assertNotIn("extensionDependencies", package_json)
                 self.assertEqual(package_json["icon"], "media/icon.png")
                 self.assertTrue((output_dir / "media" / "icon.png").exists())
                 self.assertTrue((output_dir / "LICENSE").exists())
@@ -965,9 +967,11 @@ class CursorZhTests(unittest.TestCase):
                 readme = (output_dir / "README.md").read_text(encoding="utf-8")
                 self.assertIn("当前导出基于 Cursor `2.6.18`", readme)
                 self.assertIn("`--version 0.1.0`", readme)
+                self.assertIn("这不是本扩展的前置条件", readme)
                 changelog = (output_dir / "CHANGELOG.md").read_text(encoding="utf-8")
                 self.assertIn("## 0.1.0", changelog)
                 self.assertIn("适配 Cursor 2.6.18", changelog)
+                self.assertIn("不依赖官方简体中文语言包作为安装前提", changelog)
 
                 translation = json.loads(
                     (output_dir / "translations" / "extensions" / "anysphere.cursor-demo.i18n.json").read_text(
@@ -1103,6 +1107,7 @@ class CursorZhTests(unittest.TestCase):
             self.assertEqual(portable_manifest["files"][0]["target_rel_path"], "out/nls.messages.json")
             self.assertEqual(portable_manifest["files"][0]["path"], "out/nls.messages.json")
             self.assertIsNone(portable_manifest["cursor"]["app_path"])
+            self.assertIsNone(portable_manifest["cursor"].get("lang_pack_path"))
             self.assertEqual(report["bundle_name"], "Beta-Cursor-全面汉化-2.6.18-68fbec5a")
             self.assertTrue((bundle_dir / "macOS" / "安装.command").exists())
             self.assertTrue((bundle_dir / "macOS" / "回滚.command").exists())
@@ -1114,6 +1119,9 @@ class CursorZhTests(unittest.TestCase):
             readme = (bundle_dir / "使用说明.txt").read_text(encoding="utf-8")
             self.assertIn("macOS/安装.command", readme)
             self.assertIn("Windows/安装.bat", readme)
+            self.assertIn("不会下载、复制或安装第二个 Cursor", readme)
+            self.assertIn("Python 3", readme)
+            self.assertIn("payload/artifacts/backups/", readme)
 
     def test_export_local_bundle_removes_stale_zip_when_not_requested(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -1177,6 +1185,64 @@ class CursorZhTests(unittest.TestCase):
             self.assertIn("--enable-dynamic-market", install_bat)
             self.assertIn('set "PAYLOAD_DIR=%ROOT_DIR%\\payload"', rollback_bat)
             self.assertIn("-m cursor_zh rollback", rollback_bat)
+
+    def test_export_local_bundle_macos_scripts_install_and_rollback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+            target = app / "out" / "nls.messages.json"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text('"Hello"\n', encoding="utf-8")
+            write_json(app / "package.json", {"version": "2.6.18"})
+            write_json(app / "product.json", {"commit": "68fbec5a", "checksums": {}})
+
+            manifest = {
+                "manifest_version": 1,
+                "cursor": {
+                    "app_path": str(app),
+                    "version": "2.6.18",
+                    "commit": "68fbec5a",
+                    "lang_pack_path": "/Users/demo/.cursor/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.105.0-universal",
+                },
+                "files": [
+                    {
+                        "path": str(target),
+                        "target_rel_path": "out/nls.messages.json",
+                        "source_sha256": sha256_text(read_text(target)),
+                        "replacements": [{"from": '"Hello"', "to": '"你好"', "expected_hits": 1}],
+                    }
+                ],
+            }
+
+            bundle_dir = root / "bundle-smoke"
+            run_export_local_bundle(manifest, output_dir=bundle_dir, enable_dynamic_market=False)
+
+            install_script = bundle_dir / "macOS" / "安装.command"
+            rollback_script = bundle_dir / "macOS" / "回滚.command"
+
+            install = subprocess.run(
+                ["bash", str(install_script), str(app)],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(install.returncode, 0, install.stderr)
+            self.assertIn("只会修改现有安装", install.stdout)
+            self.assertIn("预计变更文件=1", install.stdout)
+            self.assertIn('"你好"', read_text(target))
+            last_apply = bundle_dir / "payload" / ".cursor_zh_state" / "last_apply.json"
+            self.assertTrue(last_apply.exists())
+
+            rollback = subprocess.run(
+                ["bash", str(rollback_script)],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(rollback.returncode, 0, rollback.stderr)
+            self.assertIn('"Hello"', read_text(target))
 
 
 if __name__ == "__main__":

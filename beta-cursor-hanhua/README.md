@@ -1,12 +1,14 @@
-# Beta-Cursor-汉化
+# Beta Cursor 私有扩展汉化覆盖层（实验）
 
-面向 Cursor 的商店安全版汉化增强扩展，优先补足官方简体中文语言包尚未覆盖的 Cursor 私有扩展文案。
+这是一个实验性的 Cursor 私有扩展汉化覆盖层，用于补充标准本地化接口可见的 Cursor 私有扩展文案。
 
-## 亮点
+它不是仓库主产物，也不等价于本仓库的本地完整汉化补丁。
 
-- 依赖官方简体中文语言包，补充 Cursor 自带私有扩展里已暴露到 `package.nls.json` 的文案。
-- 不修改 Cursor.app 主程序文件，适合打包为 VSIX 并发布到 Open VSX / Cursor 扩展发现链路。
-- 不覆盖 `workbench.desktop.main.js` 里的硬编码文案；这部分仍需仓库根目录的 `cursor-zh apply` 补丁链处理。
+## 能力边界
+
+- 仅覆盖 Cursor 自带私有扩展里已经暴露到 `package.nls.json` 的文案。
+- 不修改 Cursor.app 主程序文件，适合打包为 VSIX 或作为实验性附属产物分发。
+- 不覆盖 `workbench.desktop.main.js` 等主程序硬编码文案；这部分仍需仓库根目录的 `cursor-zh apply` 补丁链处理。
 
 ## 当前生成信息
 
@@ -30,9 +32,9 @@
 
 ## 安装方式
 
-1. 在 Cursor 中先安装官方简体中文语言包 `MS-CEINTL.vscode-language-pack-zh-hans`。
-2. 安装本扩展的 `.vsix`，然后重载 Cursor。
-3. 若仍有未汉化区域，属于 Cursor 主程序硬编码文案，请配合本仓库根目录的完整补丁版使用。
+1. 安装本扩展的 `.vsix`，然后重载 Cursor。
+2. 若仍有未汉化区域，说明它属于 Cursor 主程序硬编码文案或未暴露到标准本地化接口的私有界面，请改用本仓库根目录的完整补丁链。
+3. 如果你还想补齐 Cursor / VS Code 公共界面的通用简体中文，可额外叠加官方简体中文语言包，但这不是本扩展的前置条件。
 
 ## 当前无法直接做成商店语言包的内置扩展
 
@@ -74,8 +76,8 @@ OPEN_VSX_TOKEN=xxxx ./scripts/publish-openvsx.sh
 
 ## 边界说明
 
-- Cursor 商店版只承载标准本地化接口可见的文案。
-- 你的“全方位汉化”里那些直接改主程序 JS 的部分，不能等价迁移成纯语言包。
-- 如果要追求与当前补丁版接近的覆盖率，建议并行维护两个产物：
-- `beta-cursor-hanhua/`：Open VSX / Cursor 商店安全版。
+- 该覆盖层只承载标准本地化接口可见的文案。
+- 直接改主程序 JS 的完整汉化部分，不能等价迁移成纯语言包或纯覆盖层。
+- 如需接近本仓库当前覆盖率，应优先使用仓库根目录的本地完整补丁版。
+- `beta-cursor-hanhua/`：实验性私有扩展汉化覆盖层。
 - 仓库根目录 `cursor-zh`：本地完整补丁版。

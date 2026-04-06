@@ -30,25 +30,52 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          source = Path("payload/cursor_zh/cli.py").read_text(encoding="utf-8")
-          compile(source, "payload/cursor_zh/cli.py", "exec")
+          source = Path("cursor_zh/cli.py").read_text(encoding="utf-8")
+          compile(source, "cursor_zh/cli.py", "exec")
           print("cli.py syntax ok")
+          PY
+
+      - name: Create smoke manifest
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = {
+              "manifest_version": 1,
+              "cursor": {
+                  "app_path": "/tmp/cursor-app",
+                  "version": "3.0.12",
+                  "commit": "test-commit",
+                  "lang_pack_path": "/Users/demo/.cursor/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.105.0-universal",
+              },
+              "files": [
+                  {
+                      "path": "/tmp/cursor-app/out/nls.messages.json",
+                      "target_rel_path": "out/nls.messages.json",
+                      "source_sha256": "dummy",
+                      "replacements": [{"from": "\"Hello\"", "to": "\"你好\"", "expected_hits": 1}],
+                  }
+              ],
+          }
+          Path(".ci-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
           PY
 
       - name: Export local bundle
         shell: bash
         run: |
-          export PYTHONPATH=payload
+          export PYTHONPATH=.
           rm -rf .ci-bundle
           python -m cursor_zh export-local-bundle \
-            --manifest payload/patch_manifest.json \
+            --manifest .ci-manifest.json \
             --output-dir .ci-bundle \
             --enable-dynamic-market
 
       - name: Export experimental overlay
         shell: bash
         run: |
-          export PYTHONPATH=payload
+          export PYTHONPATH=.
           rm -rf .ci-store-overlay .ci-cursor-app
           mkdir -p .ci-cursor-app/extensions/cursor-private-sample
           python - <<'PY'
@@ -79,6 +106,14 @@ jobs:
           test -f .ci-bundle/macOS/回滚.command
           test -f .ci-bundle/Windows/安装.bat
           test -f .ci-bundle/Windows/回滚.bat
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path(".ci-bundle/payload/patch_manifest.json").read_text(encoding="utf-8"))
+          assert manifest["cursor"]["app_path"] is None
+          assert manifest["cursor"]["lang_pack_path"] is None
+          PY
 
       - name: Validate overlay metadata and copy text
         shell: bash
@@ -92,31 +127,70 @@ jobs:
           changelog = Path(".ci-store-overlay/CHANGELOG.md").read_text(encoding="utf-8")
           root_readme = Path("README.md").read_text(encoding="utf-8")
 
-          assert package["name"] == "beta-cursor-private-zh-overlay"
+          assert package["name"] == "beta-cursor-hanhua"
           assert package["displayName"] == "Beta Cursor 私有扩展汉化覆盖层（实验）"
           assert "extensionDependencies" not in package
           assert "依赖官方简体中文语言包" not in readme
           assert "实验性的 Cursor 私有扩展汉化覆盖层" in readme
           assert "不依赖官方简体中文语言包作为安装前提" in changelog
-          assert "官方简体中文语言包的补丁层" not in root_readme
-          assert "独立本地完整汉化补丁仓库" in root_readme
+          assert "Source code zip" in root_readme
+          assert "GitHub Releases" in root_readme
           PY
 
-  windows-wrapper:
-    name: Windows Wrapper Smoke
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run Windows installer wrapper with missing target
-        shell: cmd
+      - name: macOS bundle install and rollback smoke
+        if: matrix.os == 'macos-latest'
+        shell: bash
         run: |
-          Windows\安装.bat "%RUNNER_TEMP%\missing-cursor-app"
-          if not "%ERRORLEVEL%"=="2" exit /b 1
+          export PYTHONPATH=.
+          rm -rf .ci-target-app
+          mkdir -p .ci-target-app/out
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path(".ci-target-app")
+          (root / "package.json").write_text(json.dumps({"version": "3.0.12"}), encoding="utf-8")
+          (root / "product.json").write_text(json.dumps({"commit": "test-commit", "checksums": {}}), encoding="utf-8")
+          (root / "out" / "nls.messages.json").write_text('"Hello"\n', encoding="utf-8")
+          PY
+          bash .ci-bundle/macOS/安装.command "$PWD/.ci-target-app"
+          python - <<'PY'
+          from pathlib import Path
+          text = Path(".ci-target-app/out/nls.messages.json").read_text(encoding="utf-8")
+          assert '"你好"' in text
+          PY
+          bash .ci-bundle/macOS/回滚.command
+          python - <<'PY'
+          from pathlib import Path
+          text = Path(".ci-target-app/out/nls.messages.json").read_text(encoding="utf-8")
+          assert '"Hello"' in text
+          PY
+
+      - name: Windows bundle install and rollback smoke
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $env:PYTHONPATH = "."
+          Remove-Item -Recurse -Force .ci-target-app -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path .ci-target-app/out | Out-Null
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path(".ci-target-app")
+          (root / "package.json").write_text(json.dumps({"version": "3.0.12"}), encoding="utf-8")
+          (root / "product.json").write_text(json.dumps({"commit": "test-commit", "checksums": {}}), encoding="utf-8")
+          (root / "out" / "nls.messages.json").write_text('"Hello"\n', encoding="utf-8")
+          PY
+          cmd /c ".ci-bundle\\Windows\\安装.bat \"%CD%\\.ci-target-app\""
+          python - <<'PY'
+          from pathlib import Path
+          text = Path(".ci-target-app/out/nls.messages.json").read_text(encoding="utf-8")
+          assert '"你好"' in text
+          PY
+          cmd /c ".ci-bundle\\Windows\\回滚.bat"
+          python - <<'PY'
+          from pathlib import Path
+          text = Path(".ci-target-app/out/nls.messages.json").read_text(encoding="utf-8")
+          assert '"Hello"' in text
+          PY

@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 ARTIFACTS_DIR = ROOT / "artifacts"
 STATE_DIR = ROOT / ".cursor_zh_state"
-STORE_EXTENSION_DIR = ROOT / "beta-cursor-private-zh-overlay"
+STORE_EXTENSION_DIR = ROOT / "beta-cursor-hanhua"
 
 SCAN_DIR = ARTIFACTS_DIR / "scan"
 PATCH_MANIFEST_DIR = ARTIFACTS_DIR / "patch_manifest"
@@ -344,12 +344,12 @@ def build_store_extension_readme(
             "",
             "- `--publisher your-openvsx-namespace`",
             "- `--version 0.1.0`",
-            "- `--output-dir ./beta-cursor-private-zh-overlay`",
+            "- `--output-dir ./beta-cursor-hanhua`",
             "",
             "## 打包与发布",
             "",
             "```bash",
-            "cd beta-cursor-private-zh-overlay",
+            "cd beta-cursor-hanhua",
             "./scripts/package-openvsx.sh",
             "OPEN_VSX_TOKEN=xxxx ./scripts/publish-openvsx.sh",
             "```",
@@ -359,7 +359,7 @@ def build_store_extension_readme(
             "- 该覆盖层只承载标准本地化接口可见的文案。",
             "- 直接改主程序 JS 的完整汉化部分，不能等价迁移成纯语言包或纯覆盖层。",
             "- 如需接近本仓库当前覆盖率，应优先使用仓库根目录的本地完整补丁版。",
-            "- `beta-cursor-private-zh-overlay/`：实验性私有扩展汉化覆盖层。",
+            "- `beta-cursor-hanhua/`：实验性私有扩展汉化覆盖层。",
             "- 仓库根目录 `cursor-zh`：本地完整补丁版。",
             "",
         ]
@@ -444,7 +444,7 @@ def run_export_store_extension(
     output_dir: Path | None = None,
     publisher: str = "beta-cursor",
     version: str = "0.1.0",
-    package_name: str = "beta-cursor-private-zh-overlay",
+    package_name: str = "beta-cursor-hanhua",
     package_display_name: str = "Beta Cursor 私有扩展汉化覆盖层（实验）",
 ) -> dict[str, Any]:
     ensure_dirs()
@@ -835,10 +835,10 @@ def run_scan(ctx: CursorContext) -> dict[str, Any]:
                 distinct_hits.add(phrase)
                 if phrase in core_phrases:
                     core_detected.add(phrase)
-        residual_literals = sample_english_literals_for_path(file_path, scan_content, limit=sample_limit_for_path(file_path))
+        residual_literals = sample_english_literals_for_path(file_path, content, limit=sample_limit_for_path(file_path))
         promoted_hits = promote_core_sample_literals_for_path(
             file_path,
-            scan_content,
+            content,
             residual_literals,
             tracked_hits,
             translations,
@@ -1372,7 +1372,12 @@ def build_portable_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
     portable = json.loads(json.dumps(manifest))
     app_path = resolve_manifest_app_path(manifest)
     cursor = dict(portable.get("cursor", {}))
-    cursor["app_path"] = None
+    for key, value in list(cursor.items()):
+        if key == "app_path":
+            cursor[key] = None
+            continue
+        if key.endswith("_path") and isinstance(value, str):
+            cursor[key] = None
     portable["cursor"] = cursor
     portable["portable"] = True
 
@@ -2547,13 +2552,15 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
         [
             f"# {bundle_name}",
             "",
-            "这是一个可在另一台电脑上复现的 Cursor 汉化本地补丁包，包含 macOS 与 Windows 启动器。",
+            "这是一个给普通用户分发的 Cursor 汉化本地补丁包，包含 macOS 与 Windows 启动器。",
+            "它只会修改目标机器上已经安装好的 Cursor，不会下载、复制或安装第二个 Cursor。",
             "",
             "## 中文说明",
             "",
             "### 安装",
             "",
             "- 把整个目录拷到目标电脑，不要只拷单个脚本文件。",
+            "- 运行前置条件：目标电脑已安装 Cursor，并且可以调用 Python 3。",
             "- macOS：进入 `macOS/`，双击 `macOS/安装.command`。",
             "- Windows：进入 `Windows/`，双击 `Windows/安装.bat`。",
             "- 如需手动指定 Cursor 路径，可按下面方式运行：",
@@ -2579,14 +2586,17 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
             "- 只拷了脚本文件：不行，必须保留 `payload/` 目录。",
             dynamic_line_zh,
             "- 运行状态、备份与回滚信息会写入 `payload/artifacts/` 与 `payload/.cursor_zh_state/`。",
+            "- 备份会占用额外磁盘空间；确认不再需要回滚后，可删除 `payload/artifacts/backups/` 释放空间。",
             "",
             "## English",
             "",
-            "This bundle is a local Cursor Chinese patch package for another computer. It includes launchers for both macOS and Windows.",
+            "This bundle is a distributable local Cursor Chinese patch package for end users. It includes launchers for both macOS and Windows.",
+            "It only patches an existing Cursor installation. It does not download, copy, or install a second Cursor app.",
             "",
             "### Install",
             "",
             "- Copy the entire folder to the target machine. Do not copy only one script file.",
+            "- Prerequisites: Cursor is already installed on the target machine, and Python 3 is available.",
             "- macOS: open the `macOS/` folder and double-click `macOS/安装.command`.",
             "- Windows: open the `Windows/` folder and double-click `Windows/安装.bat`.",
             "- To pass a custom Cursor path, run:",
@@ -2612,6 +2622,7 @@ def build_local_bundle_readme(bundle_name: str, enable_dynamic_market: bool) -> 
             "- Only the script was copied: keep the whole folder, especially `payload/`.",
             dynamic_line_en,
             "- Runtime state, backups, and rollback data are stored in `payload/artifacts/` and `payload/.cursor_zh_state/`.",
+            "- Backups consume extra disk space; once rollback is no longer needed, you can delete `payload/artifacts/backups/`.",
             "",
         ]
     )
@@ -2633,6 +2644,8 @@ def build_local_bundle_install_script(enable_dynamic_market: bool) -> str:
             '  echo "[install-local-patch] 未找到 Cursor 资源目录: $TARGET_APP" >&2',
             "  exit 2",
             "fi",
+            'echo "[install-local-patch] 目标 Cursor: $TARGET_APP"',
+            'echo "[install-local-patch] 只会修改现有安装，不会安装第二个 Cursor。"',
             'export PYTHONPATH="$PAYLOAD_DIR${PYTHONPATH:+:$PYTHONPATH}"',
             'python3 -m cursor_zh apply --manifest "$PAYLOAD_DIR/patch_manifest.json" --cursor-app "$TARGET_APP" '
             + dynamic_flag,
@@ -2698,6 +2711,8 @@ def build_local_bundle_install_bat(enable_dynamic_market: bool) -> str:
             '  echo Usage: Windows\\安装.bat "C:\\Users\\^<You^>\\AppData\\Local\\Programs\\Cursor\\resources\\app"',
             "  exit /b 2",
             ")",
+            'echo [install-local-patch] Target Cursor: "%TARGET_APP%"',
+            'echo [install-local-patch] This patches the existing installation and will not install a second Cursor app.',
             'set "PYTHONPATH=%PAYLOAD_DIR%;%PYTHONPATH%"',
             python_cmd,
             "set EXIT_CODE=%ERRORLEVEL%",
@@ -2829,6 +2844,7 @@ def _cmd_apply(args: argparse.Namespace) -> int:
     print(
         f"[apply] dry-run 预检: 缺失文件={preview['summary']['missing_files']} "
         f"校验不一致={preview['summary']['checksum_mismatch']} "
+        f"预计变更文件={len(preview['details'])} "
         f"可替换次数={preview['summary']['total_replacements_preview']} "
         f"动态补丁={preview['summary']['dynamic_market_patch']} "
         f"完整性补丁={preview['summary']['integrity_patch']}"
@@ -3029,7 +3045,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_export_store = sub.add_parser("export-store-extension", help="导出实验性私有扩展汉化覆盖层")
     p_export_store.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
-    p_export_store.add_argument("--output-dir", help="导出目录，默认 ./beta-cursor-private-zh-overlay")
+    p_export_store.add_argument("--output-dir", help="导出目录，默认 ./beta-cursor-hanhua")
     p_export_store.add_argument("--publisher", default="beta-cursor", help="扩展发布者 / Open VSX namespace")
     p_export_store.add_argument("--version", default="0.2.0", help="扩展版本号")
     p_export_store.set_defaults(func=_cmd_export_store_extension)

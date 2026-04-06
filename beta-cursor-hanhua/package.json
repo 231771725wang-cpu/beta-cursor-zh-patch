@@ -1,7 +1,7 @@
 {
   "name": "beta-cursor-hanhua",
-  "displayName": "Beta-Cursor-汉化",
-  "description": "Chinese localization overlay for Cursor private extensions. 补充 Cursor 私有扩展简体中文界面。",
+  "displayName": "Beta Cursor 私有扩展汉化覆盖层（实验）",
+  "description": "Experimental Chinese overlay for Cursor private extensions. 实验性补充 Cursor 私有扩展简体中文界面。",
   "version": "0.2.0",
   "publisher": "beta-cursor",
   "license": "MIT",
@@ -16,7 +16,8 @@
     "cursor",
     "chinese",
     "zh-cn",
-    "language pack",
+    "overlay",
+    "private-extension",
     "hanhua"
   ],
   "galleryBanner": {
@@ -35,9 +36,6 @@
     "package:openvsx": "bash ./scripts/package-openvsx.sh",
     "publish:openvsx": "bash ./scripts/publish-openvsx.sh"
   },
-  "extensionDependencies": [
-    "MS-CEINTL.vscode-language-pack-zh-hans"
-  ],
   "contributes": {
     "localizations": [
       {
