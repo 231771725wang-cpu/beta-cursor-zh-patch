@@ -9,6 +9,7 @@ import json
 import os
 import plistlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -59,8 +60,14 @@ INTEGRITY_SERVICE_ORIGINAL = (
     "for(let r=0,s=t.length;r<s;r++)if(!t[r].isPure){i=!1;break}return{isPure:i,proof:t}}"
 )
 INTEGRITY_SERVICE_PATCHED = "async _isPure(){return{isPure:!0,proof:[]}}"
-STATIC_REPLACEMENT_BLOCKLIST = {
-    "out/main.js",
+STATIC_REPLACEMENT_BLOCKLIST: set[str] = set()
+MAIN_PROCESS_SAFE_STATIC_PHRASES = {
+    'label:"No recent agents"',
+    'label:"Clear All Notifications"',
+    'label:"New Agent"',
+    'label:"Open Cursor"',
+    'label:"Settings"',
+    'label:"Quit"',
 }
 AGENT_MENU_CONTEXTUAL_REPLACEMENTS = (
     {
@@ -579,6 +586,9 @@ def is_safe_static_phrase_for_path(path: Path, phrase: str) -> bool:
     text = phrase.strip()
     if not text:
         return False
+    normalized = path.as_posix()
+    if normalized.endswith("out/main.js"):
+        return text in MAIN_PROCESS_SAFE_STATIC_PHRASES
     if path.suffix != ".js":
         return True
     if len(text) >= 2 and text[0] == text[-1] and text[0] in {'"', "'"}:
@@ -589,6 +599,7 @@ def is_safe_static_phrase_for_path(path: Path, phrase: str) -> bool:
 def iter_cursor_targets(ctx: CursorContext) -> list[Path]:
     targets: list[Path] = []
     fixed = [
+        ctx.app_path / "out" / "main.js",
         ctx.app_path / "out" / "nls.messages.json",
         ctx.app_path / "out" / "vs" / "workbench" / "workbench.desktop.main.js",
     ]
@@ -2115,9 +2126,14 @@ def run_verify(manifest: dict[str, Any], threshold: float) -> dict[str, Any]:
             dst_norm = dst.strip().strip('"').lower()
             if src_norm == dst_norm:
                 slot["is_exempt_keep_english"] = True
-            elif not CJK_RE.search(dst):
+            else:
                 for term in keep_terms:
-                    if re.search(rf"\b{re.escape(term)}\b", src_norm):
+                    if not re.search(rf"\b{re.escape(term)}\b", src_norm):
+                        continue
+                    if re.search(rf"\b{re.escape(term)}\b", dst_norm):
+                        slot["is_exempt_keep_english"] = True
+                        break
+                    if not CJK_RE.search(dst):
                         slot["is_exempt_keep_english"] = True
                         break
 
@@ -2236,7 +2252,7 @@ def build_auto_heal_launch_agent_plist(
     stdout_log: Path,
     stderr_log: Path,
 ) -> str:
-    program_arguments = [
+    python_arguments = [
         python_bin,
         "-m",
         "cursor_zh",
@@ -2251,15 +2267,17 @@ def build_auto_heal_launch_agent_plist(
         str(stdout_log),
     ]
     if enable_dynamic_market:
-        program_arguments.append("--enable-dynamic-market")
+        python_arguments.append("--enable-dynamic-market")
+
+    shell_command = (
+        f"cd {shlex.quote(str(repo_root))} && "
+        f"export PYTHONPATH={shlex.quote(str(repo_root))} && "
+        f"exec {' '.join(shlex.quote(arg) for arg in python_arguments)}"
+    )
 
     payload = {
         "Label": label,
-        "ProgramArguments": program_arguments,
-        "WorkingDirectory": str(repo_root),
-        "EnvironmentVariables": {
-            "PYTHONPATH": str(repo_root),
-        },
+        "ProgramArguments": ["/bin/zsh", "-lc", shell_command],
         "RunAtLoad": True,
         "StartInterval": max(60, int(interval_minutes * 60)),
         "StandardOutPath": str(stdout_log),
@@ -3042,6 +3060,43 @@ def build_parser() -> argparse.ArgumentParser:
     p_upgrade.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
     p_upgrade.add_argument("--threshold", type=float, default=98.0, help="覆盖率阈值（默认 98）")
     p_upgrade.set_defaults(func=_cmd_upgrade)
+
+    p_auto_heal = sub.add_parser("auto-heal", help="检测版本变化后自动重扫并补丁")
+    p_auto_heal.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
+    p_auto_heal.add_argument("--threshold", type=float, default=98.0, help="覆盖率阈值（默认 98）")
+    p_auto_heal.add_argument("--state-file", help="自动修复状态文件路径")
+    p_auto_heal.add_argument("--log-file", help="自动修复 stdout 日志路径")
+    p_auto_heal.add_argument(
+        "--enable-dynamic-market",
+        action="store_true",
+        help="启用插件市场动态简介翻译补丁（主包 JS 注入）",
+    )
+    p_auto_heal.set_defaults(func=_cmd_auto_heal)
+
+    p_install_auto_heal = sub.add_parser("install-auto-heal", help="安装自动检测 LaunchAgent")
+    p_install_auto_heal.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")
+    p_install_auto_heal.add_argument("--interval-minutes", type=int, default=10, help="检测间隔分钟数（默认 10）")
+    p_install_auto_heal.add_argument("--threshold", type=float, default=98.0, help="覆盖率阈值（默认 98）")
+    p_install_auto_heal.add_argument("--state-file", help="自动修复状态文件路径")
+    p_install_auto_heal.add_argument("--stdout-log", help="自动修复 stdout 日志路径")
+    p_install_auto_heal.add_argument("--stderr-log", help="自动修复 stderr 日志路径")
+    p_install_auto_heal.add_argument(
+        "--enable-dynamic-market",
+        action="store_true",
+        help="启用插件市场动态简介翻译补丁（主包 JS 注入）",
+    )
+    p_install_auto_heal.set_defaults(func=_cmd_install_auto_heal)
+
+    p_uninstall_auto_heal = sub.add_parser("uninstall-auto-heal", help="卸载自动检测 LaunchAgent")
+    p_uninstall_auto_heal.add_argument("--plist-path", help="LaunchAgent plist 路径")
+    p_uninstall_auto_heal.set_defaults(func=_cmd_uninstall_auto_heal)
+
+    p_status_auto_heal = sub.add_parser("status-auto-heal", help="查看自动检测 LaunchAgent 状态")
+    p_status_auto_heal.add_argument("--state-file", help="自动修复状态文件路径")
+    p_status_auto_heal.add_argument("--plist-path", help="LaunchAgent plist 路径")
+    p_status_auto_heal.add_argument("--stdout-log", help="自动修复 stdout 日志路径")
+    p_status_auto_heal.add_argument("--stderr-log", help="自动修复 stderr 日志路径")
+    p_status_auto_heal.set_defaults(func=_cmd_status_auto_heal)
 
     p_export_store = sub.add_parser("export-store-extension", help="导出实验性私有扩展汉化覆盖层")
     p_export_store.add_argument("--cursor-app", help="Cursor.app/Contents/Resources/app 目录")

@@ -12,6 +12,7 @@ from cursor_zh.cli import (
     CursorContext,
     apply_manifest,
     build_auto_heal_launch_agent_plist,
+    build_parser,
     collect_product_checksum_updates,
     collect_qa_issues,
     dry_run_apply,
@@ -32,6 +33,52 @@ from cursor_zh.cli import (
 
 
 class CursorZhTests(unittest.TestCase):
+    def setUp(self) -> None:
+        import cursor_zh.cli as mod
+
+        super().setUp()
+        self._sandbox = tempfile.TemporaryDirectory()
+        sandbox_root = Path(self._sandbox.name)
+        self._old_paths = {
+            "ARTIFACTS_DIR": mod.ARTIFACTS_DIR,
+            "STATE_DIR": mod.STATE_DIR,
+            "SCAN_DIR": mod.SCAN_DIR,
+            "PATCH_MANIFEST_DIR": mod.PATCH_MANIFEST_DIR,
+            "QA_DIR": mod.QA_DIR,
+            "BACKUP_DIR": mod.BACKUP_DIR,
+            "COVERAGE_DIR": mod.COVERAGE_DIR,
+            "UPGRADE_DIR": mod.UPGRADE_DIR,
+            "STORE_EXTENSION_ARTIFACTS_DIR": mod.STORE_EXTENSION_ARTIFACTS_DIR,
+            "LOCAL_BUNDLE_DIR": mod.LOCAL_BUNDLE_DIR,
+            "LOGS_DIR": mod.LOGS_DIR,
+            "AUTO_HEAL_STATUS_PATH": mod.AUTO_HEAL_STATUS_PATH,
+            "AUTO_HEAL_LOG_PATH": mod.AUTO_HEAL_LOG_PATH,
+            "AUTO_HEAL_ERR_LOG_PATH": mod.AUTO_HEAL_ERR_LOG_PATH,
+        }
+
+        mod.ARTIFACTS_DIR = sandbox_root / "artifacts"
+        mod.STATE_DIR = sandbox_root / ".cursor_zh_state"
+        mod.SCAN_DIR = mod.ARTIFACTS_DIR / "scan"
+        mod.PATCH_MANIFEST_DIR = mod.ARTIFACTS_DIR / "patch_manifest"
+        mod.QA_DIR = mod.ARTIFACTS_DIR / "qa"
+        mod.BACKUP_DIR = mod.ARTIFACTS_DIR / "backups"
+        mod.COVERAGE_DIR = mod.ARTIFACTS_DIR / "coverage_report"
+        mod.UPGRADE_DIR = mod.ARTIFACTS_DIR / "upgrade"
+        mod.STORE_EXTENSION_ARTIFACTS_DIR = mod.ARTIFACTS_DIR / "store_extension"
+        mod.LOCAL_BUNDLE_DIR = mod.ARTIFACTS_DIR / "local_bundle"
+        mod.LOGS_DIR = mod.ARTIFACTS_DIR / "logs"
+        mod.AUTO_HEAL_STATUS_PATH = mod.STATE_DIR / "auto_heal_status.json"
+        mod.AUTO_HEAL_LOG_PATH = mod.LOGS_DIR / "auto-heal.log"
+        mod.AUTO_HEAL_ERR_LOG_PATH = mod.LOGS_DIR / "auto-heal.err.log"
+
+    def tearDown(self) -> None:
+        import cursor_zh.cli as mod
+
+        for key, value in self._old_paths.items():
+            setattr(mod, key, value)
+        self._sandbox.cleanup()
+        super().tearDown()
+
     def _make_auto_heal_app(self, root: Path, version: str, commit: str, *, workbench_text: str = "const demo = 1;\n") -> CursorContext:
         app = root / "Cursor.app" / "Contents" / "Resources" / "app"
         nls = app / "out" / "nls.messages.json"
@@ -275,15 +322,90 @@ class CursorZhTests(unittest.TestCase):
         )
 
         self.assertIn("<string>com.beta.cursor-zh.auto-heal</string>", plist_text)
-        self.assertIn("<string>/usr/bin/python3</string>", plist_text)
-        self.assertIn("<string>-m</string>", plist_text)
-        self.assertIn("<string>cursor_zh</string>", plist_text)
-        self.assertIn("<string>auto-heal</string>", plist_text)
+        self.assertIn("<string>/bin/zsh</string>", plist_text)
+        self.assertIn("<string>-lc</string>", plist_text)
+        self.assertIn("cd /tmp/repo", plist_text)
+        self.assertIn("export PYTHONPATH=/tmp/repo", plist_text)
+        self.assertIn("exec /usr/bin/python3 -m cursor_zh auto-heal", plist_text)
         self.assertIn("<integer>600</integer>", plist_text)
-        self.assertIn("<string>/tmp/repo</string>", plist_text)
         self.assertIn("<string>/tmp/repo/artifacts/logs/auto-heal.log</string>", plist_text)
 
-    def test_build_skips_blocked_main_process_file(self) -> None:
+    def test_build_parser_registers_auto_heal_commands(self) -> None:
+        parser = build_parser()
+        help_text = parser.format_help()
+
+        self.assertIn("auto-heal", help_text)
+        self.assertIn("install-auto-heal", help_text)
+        self.assertIn("uninstall-auto-heal", help_text)
+        self.assertIn("status-auto-heal", help_text)
+
+        auto_heal_args = parser.parse_args(
+            [
+                "auto-heal",
+                "--cursor-app",
+                "/Applications/Cursor.app/Contents/Resources/app",
+                "--threshold",
+                "97",
+                "--state-file",
+                "/tmp/auto-heal.json",
+                "--log-file",
+                "/tmp/auto-heal.log",
+                "--enable-dynamic-market",
+            ]
+        )
+        self.assertEqual(auto_heal_args.command, "auto-heal")
+        self.assertEqual(auto_heal_args.cursor_app, "/Applications/Cursor.app/Contents/Resources/app")
+        self.assertEqual(auto_heal_args.threshold, 97.0)
+        self.assertEqual(auto_heal_args.state_file, "/tmp/auto-heal.json")
+        self.assertEqual(auto_heal_args.log_file, "/tmp/auto-heal.log")
+        self.assertTrue(auto_heal_args.enable_dynamic_market)
+
+        install_args = parser.parse_args(
+            [
+                "install-auto-heal",
+                "--cursor-app",
+                "/Applications/Cursor.app/Contents/Resources/app",
+                "--interval-minutes",
+                "15",
+                "--threshold",
+                "96",
+                "--state-file",
+                "/tmp/state.json",
+                "--stdout-log",
+                "/tmp/out.log",
+                "--stderr-log",
+                "/tmp/err.log",
+                "--enable-dynamic-market",
+            ]
+        )
+        self.assertEqual(install_args.command, "install-auto-heal")
+        self.assertEqual(install_args.interval_minutes, 15)
+        self.assertEqual(install_args.threshold, 96.0)
+        self.assertEqual(install_args.stdout_log, "/tmp/out.log")
+        self.assertEqual(install_args.stderr_log, "/tmp/err.log")
+        self.assertTrue(install_args.enable_dynamic_market)
+
+        status_args = parser.parse_args(
+            [
+                "status-auto-heal",
+                "--state-file",
+                "/tmp/state.json",
+                "--plist-path",
+                "/tmp/demo.plist",
+                "--stdout-log",
+                "/tmp/out.log",
+                "--stderr-log",
+                "/tmp/err.log",
+            ]
+        )
+        self.assertEqual(status_args.command, "status-auto-heal")
+        self.assertEqual(status_args.plist_path, "/tmp/demo.plist")
+
+        uninstall_args = parser.parse_args(["uninstall-auto-heal", "--plist-path", "/tmp/demo.plist"])
+        self.assertEqual(uninstall_args.command, "uninstall-auto-heal")
+        self.assertEqual(uninstall_args.plist_path, "/tmp/demo.plist")
+
+    def test_build_skips_non_allowlisted_main_process_phrase(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             main_js = root / "Cursor.app" / "Contents" / "Resources" / "app" / "out" / "main.js"
@@ -316,6 +438,58 @@ class CursorZhTests(unittest.TestCase):
                 self.assertEqual(manifest["files"], [])
             finally:
                 mod.DATA_DIR = old_data_dir
+
+    def test_build_and_apply_translates_tray_menu_labels_in_main_process_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+            main_js = app / "out" / "main.js"
+            workbench = app / "out" / "vs" / "workbench" / "workbench.desktop.main.js"
+            main_js.parent.mkdir(parents=True, exist_ok=True)
+            workbench.parent.mkdir(parents=True, exist_ok=True)
+            main_js.write_text(
+                'e.push({label:"No recent agents",enabled:!1});\n'
+                'e.push({label:"Clear All Notifications"});\n'
+                'e.push({label:"New Agent"});\n'
+                'e.push({label:"Open Cursor"});\n'
+                'e.push({label:"Settings"});\n'
+                'e.push({label:"Quit"});\n',
+                encoding="utf-8",
+            )
+            (app / "out" / "nls.messages.json").write_text("[]", encoding="utf-8")
+            workbench.write_text("const noop = 1;\n", encoding="utf-8")
+            (app / "product.json").write_text(json.dumps({"checksums": {}}) + "\n", encoding="utf-8")
+            (app / "package.json").write_text('{"version":"3.0.12"}\n', encoding="utf-8")
+
+            report = run_scan(
+                CursorContext(
+                    app_path=app,
+                    package_path=app / "package.json",
+                    product_path=app / "product.json",
+                    version="3.0.12",
+                    commit="a80ff7df",
+                    lang_pack_path=None,
+                )
+            )
+            file_item = next(item for item in report["files"] if item["path"].endswith("out/main.js"))
+            self.assertEqual(file_item["tracked_hits"]['label:"No recent agents"'], 1)
+            self.assertEqual(file_item["tracked_hits"]['label:"Clear All Notifications"'], 1)
+            self.assertEqual(file_item["tracked_hits"]['label:"New Agent"'], 1)
+            self.assertEqual(file_item["tracked_hits"]['label:"Open Cursor"'], 1)
+            self.assertEqual(file_item["tracked_hits"]['label:"Settings"'], 1)
+            self.assertEqual(file_item["tracked_hits"]['label:"Quit"'], 1)
+
+            manifest = run_build(report)
+            result = apply_manifest(manifest, backup_root=root / "backup", force=False)
+            self.assertGreaterEqual(result["changed_files_count"], 1)
+
+            content = read_text(main_js)
+            self.assertIn('label:"暂无最近智能体"', content)
+            self.assertIn('label:"清除全部通知"', content)
+            self.assertIn('label:"新建智能体"', content)
+            self.assertIn('label:"打开 Cursor"', content)
+            self.assertIn('label:"设置"', content)
+            self.assertIn('label:"退出"', content)
 
     def test_scan_skips_identifier_like_js_phrases(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -432,6 +606,43 @@ class CursorZhTests(unittest.TestCase):
             forbidden_terms=[],
         )
         self.assertTrue(any(item["type"] == "keep_english_term_missing" for item in issues["errors"]))
+
+    def test_verify_allows_bilingual_keep_english_term(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "nls.messages.json"
+            target.write_text('"智能体（Agents）"\n"云端智能体（Cloud Agents）"\n', encoding="utf-8")
+
+            import cursor_zh.cli as mod
+
+            old_data_dir = mod.DATA_DIR
+            try:
+                fake_data = root / "data"
+                (fake_data / "coverage").mkdir(parents=True, exist_ok=True)
+                (fake_data / "glossary").mkdir(parents=True, exist_ok=True)
+                write_json(fake_data / "coverage" / "core_phrases.json", ["Agents", "Cloud Agents"])
+                write_json(fake_data / "glossary" / "forbidden_terms.json", [])
+                write_json(fake_data / "glossary" / "keep_english_terms.json", ["Agents", "Cloud Agents"])
+                mod.DATA_DIR = fake_data
+
+                manifest = {
+                    "files": [
+                        {
+                            "path": str(target),
+                            "source_sha256": sha256_text(read_text(target)),
+                            "replacements": [
+                                {"from": "Agents", "to": "智能体（Agents）", "expected_hits": 1},
+                                {"from": "Cloud Agents", "to": "云端智能体（Cloud Agents）", "expected_hits": 1},
+                            ],
+                        }
+                    ]
+                }
+
+                report = run_verify(manifest, threshold=98.0)
+                self.assertTrue(report["summary"]["pass"])
+                self.assertEqual(report["summary"]["coverage_percent"], 100.0)
+            finally:
+                mod.DATA_DIR = old_data_dir
 
     def test_apply_and_rollback(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -587,6 +798,156 @@ class CursorZhTests(unittest.TestCase):
             self.assertIn("从 VS Code 导入设置", content)
             self.assertIn("编辑器为空时自动隐藏", content)
             self.assertIn("当所有编辑器关闭时，隐藏编辑器区域并最大化聊天", content)
+
+    def test_build_and_apply_translates_common_menu_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+            workbench = app / "out" / "vs" / "workbench" / "workbench.desktop.main.js"
+            workbench.parent.mkdir(parents=True, exist_ok=True)
+            workbench.write_text(
+                'const a="Settings";\n'
+                'const b="Quit";\n'
+                'const c="Clear All Notifications";\n'
+                'const d="Close";\n'
+                'const e="Cancel";\n',
+                encoding="utf-8",
+            )
+            write_json(
+                app / "out" / "nls.messages.json",
+                [
+                    "Undo",
+                    "Redo",
+                    "Cut",
+                    "Copy",
+                    "Paste",
+                    "Select All",
+                    "&&Undo",
+                    "&&Redo",
+                    "&&Cut",
+                    "&&Copy",
+                    "&&Paste",
+                    "&&Cancel",
+                    "&&Close",
+                    "&&Select All",
+                ],
+            )
+            (app / "product.json").write_text(json.dumps({"checksums": {}}) + "\n", encoding="utf-8")
+            (app / "package.json").write_text('{"version":"3.0.12"}\n', encoding="utf-8")
+
+            report = run_scan(
+                CursorContext(
+                    app_path=app,
+                    package_path=app / "package.json",
+                    product_path=app / "product.json",
+                    version="3.0.12",
+                    commit="a80ff7df",
+                    lang_pack_path=None,
+                )
+            )
+            nls_item = next(item for item in report["files"] if item["path"].endswith("nls.messages.json"))
+            workbench_item = next(item for item in report["files"] if item["path"].endswith("workbench.desktop.main.js"))
+            self.assertEqual(nls_item["tracked_hits"]['"Undo"'], 1)
+            self.assertEqual(nls_item["tracked_hits"]["&&Copy"], 1)
+            self.assertEqual(nls_item["tracked_hits"]["&&Select All"], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['"Settings"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['"Clear All Notifications"'], 1)
+
+            manifest = run_build(report)
+            result = apply_manifest(manifest, backup_root=root / "backup", force=False)
+            self.assertGreaterEqual(result["changed_files_count"], 1)
+
+            nls_content = read_text(app / "out" / "nls.messages.json")
+            workbench_content = read_text(workbench)
+            self.assertIn('"撤销"', nls_content)
+            self.assertIn('"重做"', nls_content)
+            self.assertIn('"剪切"', nls_content)
+            self.assertIn('"复制"', nls_content)
+            self.assertIn('"粘贴"', nls_content)
+            self.assertIn('"全选"', nls_content)
+            self.assertIn("&&撤销", nls_content)
+            self.assertIn("&&复制", nls_content)
+            self.assertIn("&&关闭", nls_content)
+            self.assertIn('"设置"', workbench_content)
+            self.assertIn('"退出"', workbench_content)
+            self.assertIn('"清除全部通知"', workbench_content)
+            self.assertIn('"关闭"', workbench_content)
+            self.assertIn('"取消"', workbench_content)
+
+    def test_build_and_apply_translates_appearance_menu_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+            workbench = app / "out" / "vs" / "workbench" / "workbench.desktop.main.js"
+            workbench.parent.mkdir(parents=True, exist_ok=True)
+            workbench.write_text(
+                'const a={label:"Appearance"};\n'
+                'const b={label:"Help"};\n'
+                'const c={title:"Log Out"};\n'
+                'const d=[{mode:"light",label:"Light"},{mode:"dark",label:"Dark"},{mode:"system",label:"System"}];\n'
+                'const e={label:"High Contrast"};\n',
+                encoding="utf-8",
+            )
+            write_json(
+                app / "out" / "nls.messages.json",
+                [
+                    "Appearance",
+                    "Help",
+                    "System",
+                    "Light",
+                    "Dark",
+                    "High Contrast",
+                    "&&Appearance",
+                    "&&Help",
+                ],
+            )
+            (app / "product.json").write_text(json.dumps({"checksums": {}}) + "\n", encoding="utf-8")
+            (app / "package.json").write_text('{"version":"3.0.12"}\n', encoding="utf-8")
+
+            report = run_scan(
+                CursorContext(
+                    app_path=app,
+                    package_path=app / "package.json",
+                    product_path=app / "product.json",
+                    version="3.0.12",
+                    commit="a80ff7df",
+                    lang_pack_path=None,
+                )
+            )
+            nls_item = next(item for item in report["files"] if item["path"].endswith("nls.messages.json"))
+            workbench_item = next(item for item in report["files"] if item["path"].endswith("workbench.desktop.main.js"))
+            self.assertEqual(nls_item["tracked_hits"]['"Appearance"'], 1)
+            self.assertEqual(nls_item["tracked_hits"]["&&Appearance"], 1)
+            self.assertEqual(nls_item["tracked_hits"]['"Help"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['label:"Appearance"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['label:"Help"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['"Log Out"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['label:"System"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['label:"Light"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['label:"Dark"'], 1)
+            self.assertEqual(workbench_item["tracked_hits"]['label:"High Contrast"'], 1)
+
+            manifest = run_build(report)
+            result = apply_manifest(manifest, backup_root=root / "backup", force=False)
+            self.assertGreaterEqual(result["changed_files_count"], 1)
+
+            nls_content = read_text(app / "out" / "nls.messages.json")
+            workbench_content = read_text(workbench)
+            self.assertIn('"外观"', nls_content)
+            self.assertIn('"帮助"', nls_content)
+            self.assertIn('"跟随系统"', nls_content)
+            self.assertIn('"浅色"', nls_content)
+            self.assertIn('"深色"', nls_content)
+            self.assertIn('"高对比度"', nls_content)
+            self.assertIn("&&外观", nls_content)
+            self.assertIn("&&帮助", nls_content)
+            self.assertIn('label:"外观"', workbench_content)
+            self.assertIn('label:"帮助"', workbench_content)
+            self.assertIn('"退出登录"', workbench_content)
+            self.assertIn('label:"跟随系统"', workbench_content)
+            self.assertIn('label:"浅色"', workbench_content)
+            self.assertIn('label:"深色"', workbench_content)
+            self.assertIn('label:"高对比度"', workbench_content)
 
     def test_scan_reports_dynamic_candidates(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

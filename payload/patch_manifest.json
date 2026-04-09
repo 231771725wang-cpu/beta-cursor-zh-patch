@@ -1,109 +1,597 @@
 {
   "manifest_version": 1,
-  "generated_at": "2026-04-05T13:03:59.352693+00:00",
+  "generated_at": "2026-04-07T09:39:19.431579+00:00",
   "cursor": {
-    "app_path": null,
+    "app_path": "/Applications/Cursor.app/Contents/Resources/app",
     "version": "3.0.12",
     "commit": "a80ff7dfcaa45d7750f6e30be457261379c29b00",
-    "lang_pack_path": "/Users/chiyou/.cursor/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.105.0-universal"
+    "lang_pack_path": "/Users/aoyisheji2/.cursor/extensions/ms-ceintl.vscode-language-pack-zh-hans-1.105.0-universal"
   },
   "summary": {
-    "files_with_replacements": 2,
-    "replacement_items": 15,
-    "replacement_expected_hits": 115,
+    "files_with_replacements": 4,
+    "replacement_items": 110,
+    "replacement_expected_hits": 725,
     "untranslated_phrases_count": 0
   },
   "untranslated_phrases": [],
   "files": [
     {
-      "path": "out/nls.messages.json",
-      "source_sha256": "97255423197f3db0ba88feec032147d0cbebfc9dcc155174da1c956da0452a90",
+      "path": "/Applications/Cursor.app/Contents/Resources/app/out/main.js",
+      "source_sha256": "0b3026f3c9ef812ea6f3b86e7d9e8b6e038809d59b265d251d499e7244898c77",
       "replacements": [
         {
-          "from": "\"Open Workspace\"",
-          "to": "\"打开工作区\"",
+          "from": "label:\"Clear All Notifications\"",
+          "to": "label:\"清除全部通知\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"No recent agents\"",
+          "to": "label:\"暂无最近智能体\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"Open Cursor\"",
+          "to": "label:\"打开 Cursor\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"New Agent\"",
+          "to": "label:\"新建智能体\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"Settings\"",
+          "to": "label:\"设置\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"Quit\"",
+          "to": "label:\"退出\"",
+          "expected_hits": 1
+        }
+      ],
+      "target_rel_path": "out/main.js"
+    },
+    {
+      "path": "/Applications/Cursor.app/Contents/Resources/app/out/nls.messages.json",
+      "source_sha256": "0ed01547d7be66d369104a175683d43b0a92e3dd097d243efbeb52b534c26d7a",
+      "replacements": [
+        {
+          "from": "\"Clear All Notifications\"",
+          "to": "\"清除全部通知\"",
           "expected_hits": 2
         },
         {
-          "from": "Open Workspace",
-          "to": "打开工作区",
+          "from": "Clear All Notifications",
+          "to": "清除全部通知",
+          "expected_hits": 2
+        },
+        {
+          "from": "High Contrast",
+          "to": "高对比度",
+          "expected_hits": 6
+        },
+        {
+          "from": "\"Appearance\"",
+          "to": "\"外观\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Select All\"",
+          "to": "\"全选\"",
+          "expected_hits": 8
+        },
+        {
+          "from": "&&Appearance",
+          "to": "&&外观",
+          "expected_hits": 1
+        },
+        {
+          "from": "&&Select All",
+          "to": "&&全选",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Settings\"",
+          "to": "\"设置\"",
+          "expected_hits": 13
+        },
+        {
+          "from": "Appearance",
+          "to": "外观",
+          "expected_hits": 4
+        },
+        {
+          "from": "\"System\"",
+          "to": "\"跟随系统\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Cancel\"",
+          "to": "\"取消\"",
+          "expected_hits": 58
+        },
+        {
+          "from": "&&Cancel",
+          "to": "&&取消",
+          "expected_hits": 3
+        },
+        {
+          "from": "\"Paste\"",
+          "to": "\"粘贴\"",
           "expected_hits": 12
         },
         {
-          "from": "Home",
-          "to": "首页",
+          "from": "\"Close\"",
+          "to": "\"关闭\"",
+          "expected_hits": 30
+        },
+        {
+          "from": "&&Paste",
+          "to": "&&粘贴",
+          "expected_hits": 4
+        },
+        {
+          "from": "&&Close",
+          "to": "&&关闭",
+          "expected_hits": 9
+        },
+        {
+          "from": "\"Help\"",
+          "to": "\"帮助\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Undo\"",
+          "to": "\"撤销\"",
+          "expected_hits": 9
+        },
+        {
+          "from": "\"Redo\"",
+          "to": "\"重做\"",
+          "expected_hits": 4
+        },
+        {
+          "from": "\"Copy\"",
+          "to": "\"复制\"",
+          "expected_hits": 22
+        },
+        {
+          "from": "\"Quit\"",
+          "to": "\"退出\"",
           "expected_hits": 2
+        },
+        {
+          "from": "System",
+          "to": "跟随系统",
+          "expected_hits": 5
+        },
+        {
+          "from": "&&Help",
+          "to": "&&帮助",
+          "expected_hits": 2
+        },
+        {
+          "from": "&&Undo",
+          "to": "&&撤销",
+          "expected_hits": 3
+        },
+        {
+          "from": "&&Redo",
+          "to": "&&重做",
+          "expected_hits": 2
+        },
+        {
+          "from": "&&Copy",
+          "to": "&&复制",
+          "expected_hits": 12
+        },
+        {
+          "from": "Agents",
+          "to": "智能体（Agents）",
+          "expected_hits": 10
+        },
+        {
+          "from": "\"Cut\"",
+          "to": "\"剪切\"",
+          "expected_hits": 8
+        },
+        {
+          "from": "Light",
+          "to": "浅色",
+          "expected_hits": 7
+        },
+        {
+          "from": "Help",
+          "to": "帮助",
+          "expected_hits": 39
+        },
+        {
+          "from": "Dark",
+          "to": "深色",
+          "expected_hits": 6
         }
       ],
       "target_rel_path": "out/nls.messages.json"
     },
     {
-      "path": "out/vs/workbench/workbench.desktop.main.js",
-      "source_sha256": "415c3f9cd922e4d4bee448015c7384ac07a8470dfdf576b5dafc887c00a1624d",
+      "path": "/Applications/Cursor.app/Contents/Resources/app/out/vs/workbench/workbench.desktop.main.js",
+      "source_sha256": "84dadf7943bd50e94b51966548d0699c064e1775f3d789a72c989808a7734aaf",
       "replacements": [
         {
-          "from": "\"Ask questions without making changes...\"",
-          "to": "\"只提问，不做改动...\"",
+          "from": "Provides agent execution capabilities for Cursor, enabling agents to run commands, interact with files, and use tools with user permissions and approvals",
+          "to": "为 Cursor 提供智能体执行能力，使智能体可以在用户授权与审批下运行命令、操作文件并使用工具",
           "expected_hits": 1
         },
         {
-          "from": "Ask questions without making changes...",
-          "to": "只提问，不做改动...",
+          "from": "\"OpenAI's latest model specifically for coding. Good for ambitious coding tasks.\"",
+          "to": "\"OpenAI 最新的编程专用模型，适合有挑战性的开发任务。\"",
           "expected_hits": 1
         },
         {
-          "from": "\"Open Editor Window\"",
-          "to": "\"打开编辑器窗口\"",
+          "from": "OpenAI's latest model specifically for coding. Good for ambitious coding tasks.",
+          "to": "OpenAI 最新的编程专用模型，适合有挑战性的开发任务。",
+          "expected_hits": 1
+        },
+        {
+          "from": "HTTP server for ingesting NDJSON logs to workspace/.cursor/debug.log",
+          "to": "将 NDJSON 日志导入到 workspace/.cursor/debug.log 的 HTTP 服务器",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Systematically diagnose and fix bugs using runtime traces\"",
+          "to": "\"基于运行时追踪系统化诊断并修复问题\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Systematically diagnose and fix bugs using runtime traces",
+          "to": "基于运行时追踪系统化诊断并修复问题",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Balanced quality and speed, recommended for most tasks\"",
+          "to": "\"质量与速度均衡，适合大多数任务\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Balanced quality and speed, recommended for most tasks",
+          "to": "质量与速度均衡，适合大多数任务",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Anthropic's latest model, great for daily use.\"",
+          "to": "\"Anthropic 最新模型，适合日常使用。\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Anthropic's latest model, great for daily use.",
+          "to": "Anthropic 最新模型，适合日常使用。",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Are you sure you want to close this window?\"",
+          "to": "\"确定要关闭此窗口吗？\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Are you sure you want to close this window?",
+          "to": "确定要关闭此窗口吗？",
+          "expected_hits": 1
+        },
+        {
+          "from": "MCP server for browser automation in Cursor",
+          "to": "用于 Cursor 浏览器自动化的 MCP 服务器",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Version: medium reasoning effort\"",
+          "to": "\"版本：中等推理强度\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Version: medium reasoning effort",
+          "to": "版本：中等推理强度",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Clear All Notifications\"",
+          "to": "\"清除全部通知\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Cursor Browser Automation",
+          "to": "Cursor 浏览器自动化",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Toggle Agents Side Bar\"",
+          "to": "\"切换智能体侧边栏\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Version: medium effort\"",
+          "to": "\"版本：中等强度\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Clear All Notifications",
+          "to": "清除全部通知",
+          "expected_hits": 1
+        },
+        {
+          "from": "Toggle Agents Side Bar",
+          "to": "切换智能体侧边栏",
+          "expected_hits": 1
+        },
+        {
+          "from": "Version: medium effort",
+          "to": "版本：中等强度",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"High Contrast\"",
+          "to": "label:\"高对比度\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"200k context window\"",
+          "to": "\"200k 上下文窗口\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Close this window?\"",
+          "to": "\"关闭此窗口？\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "200k context window",
+          "to": "200k 上下文窗口",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"Appearance\"",
+          "to": "label:\"外观\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Close this window?",
+          "to": "关闭此窗口？",
+          "expected_hits": 1
+        },
+        {
+          "from": "Browser Automation",
+          "to": "浏览器自动化",
+          "expected_hits": 1
+        },
+        {
+          "from": "Close this window",
+          "to": "关闭此窗口",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Don't ask again\"",
+          "to": "\"不再询问\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"High Contrast\"",
+          "to": "\"高对比度\"",
           "expected_hits": 3
         },
         {
-          "from": "Open Editor Window",
-          "to": "打开编辑器窗口",
+          "from": "\"Search models\"",
+          "to": "\"搜索模型\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Maximize Chat\"",
+          "to": "\"最大化聊天\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Don't ask again",
+          "to": "不再询问",
+          "expected_hits": 1
+        },
+        {
+          "from": "label:\"System\"",
+          "to": "label:\"跟随系统\"",
           "expected_hits": 3
         },
         {
-          "from": "\"Open Workspace\"",
-          "to": "\"打开工作区\"",
-          "expected_hits": 6
+          "from": "\"Open Browser\"",
+          "to": "\"打开浏览器\"",
+          "expected_hits": 1
         },
         {
-          "from": "\"Plan New Idea\"",
-          "to": "\"规划新想法\"",
+          "from": "\"Cancel (esc)\"",
+          "to": "\"取消（esc）\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "High Contrast",
+          "to": "高对比度",
+          "expected_hits": 13
+        },
+        {
+          "from": "label:\"Light\"",
+          "to": "label:\"浅色\"",
           "expected_hits": 3
         },
         {
-          "from": "\"Run in Cloud\"",
-          "to": "\"在云端运行\"",
-          "expected_hits": 2
+          "from": "Search models",
+          "to": "搜索模型",
+          "expected_hits": 1
         },
         {
-          "from": "Open Workspace",
-          "to": "打开工作区",
-          "expected_hits": 12
+          "from": "Maximize Chat",
+          "to": "最大化聊天",
+          "expected_hits": 1
         },
         {
-          "from": "Plan New Idea",
-          "to": "规划新想法",
-          "expected_hits": 3
+          "from": "\"Appearance\"",
+          "to": "\"外观\"",
+          "expected_hits": 11
+        },
+        {
+          "from": "\"Select All\"",
+          "to": "\"全选\"",
+          "expected_hits": 5
         },
         {
           "from": "Cloud Agents",
-          "to": "云端智能体",
+          "to": "云端智能体（Cloud Agents）",
           "expected_hits": 37
         },
         {
-          "from": "Run in Cloud",
-          "to": "在云端运行",
+          "from": "label:\"Help\"",
+          "to": "label:\"帮助\"",
+          "expected_hits": 3
+        },
+        {
+          "from": "label:\"Dark\"",
+          "to": "label:\"深色\"",
+          "expected_hits": 3
+        },
+        {
+          "from": "\"Past Chats\"",
+          "to": "\"历史聊天\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Show Files\"",
+          "to": "\"显示文件\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Open Browser",
+          "to": "打开浏览器",
+          "expected_hits": 1
+        },
+        {
+          "from": "Cancel (esc)",
+          "to": "取消（esc）",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Settings\"",
+          "to": "\"设置\"",
+          "expected_hits": 28
+        },
+        {
+          "from": "\"New Chat\"",
+          "to": "\"新建聊天\"",
+          "expected_hits": 1
+        },
+        {
+          "from": "Past Chats",
+          "to": "历史聊天",
+          "expected_hits": 1
+        },
+        {
+          "from": "Show Files",
+          "to": "显示文件",
+          "expected_hits": 1
+        },
+        {
+          "from": "MCP server",
+          "to": "MCP 服务器",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Log Out\"",
+          "to": "\"退出登录\"",
+          "expected_hits": 3
+        },
+        {
+          "from": "\"System\"",
+          "to": "\"跟随系统\"",
+          "expected_hits": 10
+        },
+        {
+          "from": "\"Cancel\"",
+          "to": "\"取消\"",
+          "expected_hits": 144
+        },
+        {
+          "from": "New Chat",
+          "to": "新建聊天",
+          "expected_hits": 1
+        },
+        {
+          "from": "\"Light\"",
+          "to": "\"浅色\"",
+          "expected_hits": 5
+        },
+        {
+          "from": "\"Paste\"",
+          "to": "\"粘贴\"",
+          "expected_hits": 8
+        },
+        {
+          "from": "\"Close\"",
+          "to": "\"关闭\"",
+          "expected_hits": 21
+        },
+        {
+          "from": "Log Out",
+          "to": "退出登录",
+          "expected_hits": 3
+        },
+        {
+          "from": "\"Beta\"",
+          "to": "\"Beta\"",
           "expected_hits": 2
         },
         {
-          "from": "\"Home\"",
-          "to": "\"首页\"",
-          "expected_hits": 26
+          "from": "\"Help\"",
+          "to": "\"帮助\"",
+          "expected_hits": 14
+        },
+        {
+          "from": "\"Dark\"",
+          "to": "\"深色\"",
+          "expected_hits": 5
+        },
+        {
+          "from": "\"Undo\"",
+          "to": "\"撤销\"",
+          "expected_hits": 20
+        },
+        {
+          "from": "\"Redo\"",
+          "to": "\"重做\"",
+          "expected_hits": 6
+        },
+        {
+          "from": "\"Copy\"",
+          "to": "\"复制\"",
+          "expected_hits": 24
+        },
+        {
+          "from": "\"Quit\"",
+          "to": "\"退出\"",
+          "expected_hits": 2
+        },
+        {
+          "from": "\"Cut\"",
+          "to": "\"剪切\"",
+          "expected_hits": 7
         }
       ],
       "target_rel_path": "out/vs/workbench/workbench.desktop.main.js"
+    },
+    {
+      "path": "/Applications/Cursor.app/Contents/Resources/app/extensions/cursor-shadow-workspace/package.json",
+      "source_sha256": "f5ea5e17033505ad6bf47fdf0be01295603018f99f4bf95acef8fc6d720ae97b",
+      "replacements": [
+        {
+          "from": "Workspace",
+          "to": "工作区",
+          "expected_hits": 2
+        }
+      ],
+      "target_rel_path": "extensions/cursor-shadow-workspace/package.json"
     }
-  ],
-  "portable": true
+  ]
 }
