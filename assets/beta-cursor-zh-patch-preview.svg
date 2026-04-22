@@ -1,67 +1,68 @@
 <svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="160" y1="80" x2="1430" y2="820" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F6F6F6"/>
-      <stop offset="0.45" stop-color="#D9DCE1"/>
-      <stop offset="1" stop-color="#B6BBC4"/>
+    <linearGradient id="bg" x1="120" y1="40" x2="1460" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDFC"/>
+      <stop offset="0.42" stop-color="#F0F2F5"/>
+      <stop offset="1" stop-color="#D7DCE4"/>
     </linearGradient>
     <linearGradient id="glassStroke" x1="180" y1="150" x2="1320" y2="760" gradientUnits="userSpaceOnUse">
-      <stop stop-color="rgba(255,255,255,0.72)"/>
-      <stop offset="1" stop-color="rgba(255,255,255,0.16)"/>
+      <stop stop-color="rgba(255,255,255,0.95)"/>
+      <stop offset="1" stop-color="rgba(255,255,255,0.22)"/>
     </linearGradient>
     <linearGradient id="chipGlass" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#FFFFFF" stop-opacity="0.52"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop stop-color="#FFFFFF" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.28"/>
     </linearGradient>
   </defs>
 
   <rect width="1600" height="900" rx="40" fill="url(#bg)"/>
-  <circle cx="180" cy="160" r="210" fill="#FFFFFF" fill-opacity="0.42"/>
-  <circle cx="1460" cy="120" r="170" fill="#FFFFFF" fill-opacity="0.2"/>
-  <circle cx="1420" cy="760" r="230" fill="#0F1115" fill-opacity="0.12"/>
+  <circle cx="180" cy="160" r="210" fill="#FFFFFF" fill-opacity="0.75"/>
+  <circle cx="1460" cy="120" r="170" fill="#FFFFFF" fill-opacity="0.42"/>
+  <circle cx="1420" cy="760" r="230" fill="#AEB6C3" fill-opacity="0.22"/>
+  <circle cx="1250" cy="260" r="120" fill="#FFFFFF" fill-opacity="0.28"/>
 
-  <rect x="64" y="56" width="1472" height="788" rx="40" fill="#0E1115" fill-opacity="0.24"/>
+  <rect x="64" y="56" width="1472" height="788" rx="40" fill="#A8B1BF" fill-opacity="0.08"/>
 
-  <rect x="96" y="86" width="1408" height="728" rx="34" fill="#FFFFFF" fill-opacity="0.08" stroke="white" stroke-opacity="0.22" stroke-width="2"/>
+  <rect x="96" y="86" width="1408" height="728" rx="34" fill="#FFFFFF" fill-opacity="0.22" stroke="url(#glassStroke)" stroke-width="2"/>
 
-  <rect x="132" y="126" width="760" height="620" rx="34" fill="#FFFFFF" fill-opacity="0.1" stroke="white" stroke-opacity="0.16" stroke-width="2"/>
-  <rect x="162" y="164" width="282" height="58" rx="29" fill="url(#chipGlass)" stroke="white" stroke-opacity="0.18" stroke-width="2"/>
-  <text x="194" y="202" fill="#121418" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">BETA CURSOR 中文完整本地化</text>
+  <rect x="132" y="126" width="760" height="620" rx="34" fill="#FFFFFF" fill-opacity="0.3" stroke="white" stroke-opacity="0.42" stroke-width="2"/>
+  <rect x="162" y="164" width="282" height="58" rx="29" fill="url(#chipGlass)" stroke="white" stroke-opacity="0.34" stroke-width="2"/>
+  <text x="194" y="202" fill="#1A1D23" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">BETA CURSOR 中文完整本地化</text>
 
-  <text x="162" y="316" fill="#0E1014" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="800">普通用户下载补丁包</text>
-  <text x="162" y="392" fill="#0E1014" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="800">开发者维护源码仓库</text>
-  <text x="162" y="452" fill="#2C3139" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="600">真正用于安装的是 ZIP 补丁包。维护补丁链路时再进入源码仓库。</text>
+  <text x="162" y="316" fill="#14171C" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="800">普通用户下载补丁包</text>
+  <text x="162" y="392" fill="#14171C" font-family="Arial, Helvetica, sans-serif" font-size="68" font-weight="800">开发者维护源码仓库</text>
+  <text x="162" y="452" fill="#434B57" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="600">真正用于安装的是 ZIP 补丁包。维护补丁链路时再进入源码仓库。</text>
 
-  <rect x="162" y="500" width="236" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.72" stroke="white" stroke-opacity="0.62" stroke-width="2"/>
+  <rect x="162" y="500" width="236" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.92" stroke="white" stroke-opacity="0.86" stroke-width="2"/>
   <text x="206" y="540" fill="#111318" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">当前发布 v0.2.1</text>
 
-  <rect x="416" y="500" width="222" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.18" stroke="white" stroke-opacity="0.26" stroke-width="2"/>
-  <text x="461" y="540" fill="#111318" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Cursor 3.1.15</text>
+  <rect x="416" y="500" width="222" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.42" stroke="white" stroke-opacity="0.54" stroke-width="2"/>
+  <text x="461" y="540" fill="#1A1D23" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Cursor 3.1.15</text>
 
-  <rect x="654" y="500" width="188" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.14" stroke="white" stroke-opacity="0.22" stroke-width="2"/>
-  <text x="710" y="540" fill="#111318" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">可回滚</text>
+  <rect x="654" y="500" width="188" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.38" stroke="white" stroke-opacity="0.48" stroke-width="2"/>
+  <text x="710" y="540" fill="#1A1D23" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">可回滚</text>
 
-  <rect x="162" y="618" width="640" height="110" rx="30" fill="#FFFFFF" fill-opacity="0.1" stroke="white" stroke-opacity="0.18" stroke-width="2"/>
-  <text x="196" y="670" fill="#121418" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800">完整本地补丁包</text>
-  <text x="196" y="714" fill="#2E333B" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">支持现有 Cursor 直接应用，保留回滚、验证与再次导出能力。</text>
+  <rect x="162" y="618" width="640" height="110" rx="30" fill="#FFFFFF" fill-opacity="0.24" stroke="white" stroke-opacity="0.34" stroke-width="2"/>
+  <text x="196" y="670" fill="#16191E" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800">完整本地补丁包</text>
+  <text x="196" y="714" fill="#4B5360" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">支持现有 Cursor 直接应用，保留回滚、验证与再次导出能力。</text>
 
-  <rect x="936" y="148" width="474" height="264" rx="32" fill="#FFFFFF" fill-opacity="0.1" stroke="white" stroke-opacity="0.2" stroke-width="2"/>
-  <rect x="972" y="188" width="156" height="20" rx="10" fill="#101318" fill-opacity="0.18"/>
-  <rect x="972" y="238" width="180" height="92" rx="24" fill="#0D1117" fill-opacity="0.12" stroke="white" stroke-opacity="0.16" stroke-width="2"/>
-  <text x="1014" y="295" fill="#14171C" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">汉化前</text>
-  <rect x="1182" y="238" width="192" height="92" rx="24" fill="#FFFFFF" fill-opacity="0.78" stroke="white" stroke-opacity="0.52" stroke-width="2"/>
+  <rect x="936" y="148" width="474" height="264" rx="32" fill="#FFFFFF" fill-opacity="0.22" stroke="white" stroke-opacity="0.34" stroke-width="2"/>
+  <rect x="972" y="188" width="156" height="20" rx="10" fill="#20242B" fill-opacity="0.12"/>
+  <rect x="972" y="238" width="180" height="92" rx="24" fill="#0D1117" fill-opacity="0.18" stroke="white" stroke-opacity="0.18" stroke-width="2"/>
+  <text x="1014" y="295" fill="#F4F6F8" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">汉化前</text>
+  <rect x="1182" y="238" width="192" height="92" rx="24" fill="#FFFFFF" fill-opacity="0.94" stroke="white" stroke-opacity="0.76" stroke-width="2"/>
   <text x="1237" y="295" fill="#15181E" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">汉化后</text>
-  <rect x="972" y="366" width="170" height="18" rx="9" fill="#111318" fill-opacity="0.16"/>
-  <rect x="972" y="398" width="240" height="18" rx="9" fill="#111318" fill-opacity="0.12"/>
-  <rect x="1268" y="360" width="106" height="56" rx="18" fill="#0F1115" fill-opacity="0.22" stroke="white" stroke-opacity="0.16" stroke-width="2"/>
+  <rect x="972" y="366" width="170" height="18" rx="9" fill="#1D2128" fill-opacity="0.14"/>
+  <rect x="972" y="398" width="240" height="18" rx="9" fill="#1D2128" fill-opacity="0.1"/>
+  <rect x="1268" y="360" width="106" height="56" rx="18" fill="#FFFFFF" fill-opacity="0.34" stroke="white" stroke-opacity="0.3" stroke-width="2"/>
 
-  <rect x="936" y="448" width="474" height="280" rx="32" fill="#FFFFFF" fill-opacity="0.1" stroke="white" stroke-opacity="0.2" stroke-width="2"/>
-  <rect x="972" y="486" width="166" height="20" rx="10" fill="#101318" fill-opacity="0.18"/>
-  <rect x="972" y="534" width="150" height="126" rx="28" fill="#FFFFFF" fill-opacity="0.16" stroke="white" stroke-opacity="0.16" stroke-width="2"/>
-  <text x="1015" y="607" fill="#14171C" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">补丁包</text>
-  <rect x="1148" y="534" width="218" height="38" rx="19" fill="#FFFFFF" fill-opacity="0.74" stroke="white" stroke-opacity="0.56" stroke-width="2"/>
+  <rect x="936" y="448" width="474" height="280" rx="32" fill="#FFFFFF" fill-opacity="0.22" stroke="white" stroke-opacity="0.34" stroke-width="2"/>
+  <rect x="972" y="486" width="166" height="20" rx="10" fill="#20242B" fill-opacity="0.12"/>
+  <rect x="972" y="534" width="150" height="126" rx="28" fill="#FFFFFF" fill-opacity="0.32" stroke="white" stroke-opacity="0.26" stroke-width="2"/>
+  <text x="1015" y="607" fill="#1A1D23" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">补丁包</text>
+  <rect x="1148" y="534" width="218" height="38" rx="19" fill="#FFFFFF" fill-opacity="0.92" stroke="white" stroke-opacity="0.74" stroke-width="2"/>
   <text x="1170" y="559" fill="#14171C" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">macOS / Windows 安装脚本</text>
-  <rect x="1148" y="596" width="188" height="20" rx="10" fill="#111318" fill-opacity="0.16"/>
-  <rect x="1148" y="628" width="236" height="20" rx="10" fill="#111318" fill-opacity="0.12"/>
-  <rect x="1148" y="660" width="178" height="20" rx="10" fill="#111318" fill-opacity="0.1"/>
+  <rect x="1148" y="596" width="188" height="20" rx="10" fill="#1D2128" fill-opacity="0.14"/>
+  <rect x="1148" y="628" width="236" height="20" rx="10" fill="#1D2128" fill-opacity="0.1"/>
+  <rect x="1148" y="660" width="178" height="20" rx="10" fill="#1D2128" fill-opacity="0.08"/>
 </svg>
