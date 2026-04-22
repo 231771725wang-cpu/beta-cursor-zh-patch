@@ -15,9 +15,9 @@
   <text x="647" y="452" fill="#D8DEE8" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">可回滚</text>
 
   <rect x="110" y="580" width="700" height="140" rx="28" fill="#0F141D" stroke="#232B37" stroke-width="2"/>
-  <text x="148" y="628" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800">GitHub 首页应该第一眼讲清楚</text>
-  <text x="148" y="674" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">1. 普通用户下载补丁包，不要下载源码压缩包。</text>
-  <text x="148" y="708" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">2. 这个仓库是给 scan / build / verify / export / rollback 用的。</text>
+  <text x="148" y="628" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800">完整本地补丁包</text>
+  <text x="148" y="674" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">支持现有 Cursor 安装直接应用，保留回滚与验证链路。</text>
+  <text x="148" y="708" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">适合普通用户安装，也适合维护者继续导出与迭代。</text>
 
   <rect x="930" y="118" width="500" height="286" rx="28" fill="#0F141D" stroke="#232B37" stroke-width="2"/>
   <rect x="968" y="156" width="148" height="18" rx="9" fill="#ADB9C8" fill-opacity="0.28"/>
