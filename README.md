@@ -5,7 +5,7 @@
   <p><em>“先下真正可安装的 Release 包，再给你手里的 Cursor 直接装上中文。”</em></p>
   <p>
     <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-5b5b5b"></a>
-    <a href="https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.1"><img alt="Release: v0.2.1" src="https://img.shields.io/badge/Release-v0.2.1-2f2f2f"></a>
+    <a href="https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2"><img alt="Release: v0.2.2" src="https://img.shields.io/badge/Release-v0.2.2-2f2f2f"></a>
     <img alt="安装方式：Release ZIP" src="https://img.shields.io/badge/Install-Release_ZIP-111111">
     <img alt="平台：macOS 和 Windows" src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-1f6feb">
     <img alt="Rollback Included" src="https://img.shields.io/badge/Rollback-Included-7a3cff">
@@ -20,8 +20,8 @@
 
 如果你要的不是“看个思路”，而是“真装上去、还能回滚、还能继续维护”，这就是那套交付物。
 
-**下载发布页：** [v0.2.1](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.1)  
-**直接下载 ZIP：** [Beta-Cursor-全面汉化-3.1.15-3a67af7b.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.1/Beta-Cursor-%E5%85%A8%E9%9D%A2%E6%B1%89%E5%8C%96-3.1.15-3a67af7b.zip)  
+**下载发布页：** [v0.2.2](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2)  
+**直接下载 ZIP：** [Beta-Cursor-全面汉化-3.1.17-fce1e9ab.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.2/Beta-Cursor-%E5%85%A8%E9%9D%A2%E6%B1%89%E5%8C%96-3.1.17-fce1e9ab.zip)  
 **英文说明：** [README.en.md](README.en.md)
 
 ## 预览
@@ -30,7 +30,7 @@
 
 ## 普通用户安装
 
-1. 先从 [Release 页面](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.1) 下载真正的 ZIP 补丁包，不要下载源码压缩包。
+1. 先从 [Release 页面](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2) 下载真正的 ZIP 补丁包，不要下载源码压缩包。
 2. 解压之后：
    - macOS：运行 `macOS/安装.command`
    - Windows：运行 `Windows/安装.bat`

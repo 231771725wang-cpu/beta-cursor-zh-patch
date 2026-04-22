@@ -5,7 +5,7 @@
   <p><em>"Download the real release bundle first, then add full Chinese to the Cursor you already use."</em></p>
   <p>
     <a href="./LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-5b5b5b"></a>
-    <a href="https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.1"><img alt="Release: v0.2.1" src="https://img.shields.io/badge/Release-v0.2.1-2f2f2f"></a>
+    <a href="https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2"><img alt="Release: v0.2.2" src="https://img.shields.io/badge/Release-v0.2.2-2f2f2f"></a>
     <img alt="Install: Release ZIP" src="https://img.shields.io/badge/Install-Release_ZIP-111111">
     <img alt="Platform: macOS and Windows" src="https://img.shields.io/badge/Platform-macOS%20%7C%20Windows-1f6feb">
     <img alt="Rollback Included" src="https://img.shields.io/badge/Rollback-Included-7a3cff">
@@ -20,8 +20,8 @@ The source repository is for maintainers who need to continue `scan / build / qa
 
 If what you want is not a demo but a shippable local patch with rollback still within reach, this is the package.
 
-**Release page:** [v0.2.1](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.1)  
-**Direct ZIP:** [Beta-Cursor-全面汉化-3.1.15-3a67af7b.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.1/Beta-Cursor-%E5%85%A8%E9%9D%A2%E6%B1%89%E5%8C%96-3.1.15-3a67af7b.zip)
+**Release page:** [v0.2.2](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2)  
+**Direct ZIP:** [Beta-Cursor-全面汉化-3.1.17-fce1e9ab.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.2/Beta-Cursor-%E5%85%A8%E9%9D%A2%E6%B1%89%E5%8C%96-3.1.17-fce1e9ab.zip)
 
 ## Preview
 
@@ -29,7 +29,7 @@ If what you want is not a demo but a shippable local patch with rollback still w
 
 ## Install For End Users
 
-1. Download the real ZIP bundle from the [Release page](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.1), not the source archive.
+1. Download the real ZIP bundle from the [Release page](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2), not the source archive.
 2. Extract it, then run:
    - macOS: `macOS/安装.command`
    - Windows: `Windows/安装.bat`
