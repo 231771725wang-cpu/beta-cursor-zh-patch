@@ -1,143 +1,139 @@
 <svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="88" y1="48" x2="1504" y2="860" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="116" y1="54" x2="1498" y2="860" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFFFFF"/>
-      <stop offset="0.48" stop-color="#F5F6F8"/>
-      <stop offset="1" stop-color="#E7EBF0"/>
+      <stop offset="0.46" stop-color="#F7F7F9"/>
+      <stop offset="1" stop-color="#ECEEF2"/>
     </linearGradient>
-    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(196 162) rotate(22.6) scale(287 211)">
-      <stop stop-color="#FFFFFF" stop-opacity="0.95"/>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(280 148) rotate(20.7) scale(356 212)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.96"/>
       <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1364 164) rotate(125.6) scale(248 192)">
-      <stop stop-color="#FFFFFF" stop-opacity="0.75"/>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1362 720) rotate(135.5) scale(340 214)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.78"/>
       <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </radialGradient>
-    <filter id="shadow" x="52" y="52" width="1496" height="796" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="shell" x="56" y="44" width="1488" height="820" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feGaussianBlur in="BackgroundImageFix" stdDeviation="12"/>
       <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_1_1"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="18"/>
-      <feGaussianBlur stdDeviation="18"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.52 0 0 0 0 0.56 0 0 0 0 0.63 0 0 0 0.18 0"/>
+      <feOffset dy="20"/>
+      <feGaussianBlur stdDeviation="20"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.55 0 0 0 0 0.58 0 0 0 0 0.64 0 0 0 0.16 0"/>
       <feBlend mode="normal" in2="effect1_backgroundBlur_1_1" result="effect2_dropShadow_1_1"/>
       <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_1_1" result="shape"/>
     </filter>
-    <filter id="softShadow" x="118" y="122" width="786" height="632" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+    <filter id="glass" x="122" y="124" width="830" height="628" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feGaussianBlur in="BackgroundImageFix" stdDeviation="10"/>
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="8"/>
+      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_1_1"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="14"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.59 0 0 0 0 0.62 0 0 0 0 0.69 0 0 0 0.14 0"/>
+      <feBlend mode="normal" in2="effect1_backgroundBlur_1_1" result="effect2_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_1_1" result="shape"/>
+    </filter>
+    <filter id="panel" x="954" y="148" width="476" height="584" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feGaussianBlur in="BackgroundImageFix" stdDeviation="8"/>
       <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_1_1"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="12"/>
       <feGaussianBlur stdDeviation="14"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.66 0 0 0 0 0.69 0 0 0 0 0.74 0 0 0 0.14 0"/>
-      <feBlend mode="normal" in2="effect1_backgroundBlur_1_1" result="effect2_dropShadow_1_1"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_1_1" result="shape"/>
-    </filter>
-    <filter id="panelShadow" x="922" y="138" width="502" height="604" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feGaussianBlur in="BackgroundImageFix" stdDeviation="10"/>
-      <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_1_1"/>
-      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-      <feOffset dy="10"/>
-      <feGaussianBlur stdDeviation="12"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 0.68 0 0 0 0 0.71 0 0 0 0 0.76 0 0 0 0.12 0"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.6 0 0 0 0 0.63 0 0 0 0 0.7 0 0 0 0.13 0"/>
       <feBlend mode="normal" in2="effect1_backgroundBlur_1_1" result="effect2_dropShadow_1_1"/>
       <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_1_1" result="shape"/>
     </filter>
   </defs>
 
   <rect width="1600" height="900" rx="40" fill="url(#bg)"/>
-  <ellipse cx="196" cy="162" rx="226" ry="176" fill="url(#glowA)"/>
-  <ellipse cx="1364" cy="164" rx="208" ry="154" fill="url(#glowB)"/>
-  <ellipse cx="1288" cy="742" rx="296" ry="164" fill="#D9DEE5" fill-opacity="0.36"/>
-  <ellipse cx="320" cy="820" rx="268" ry="118" fill="#FFFFFF" fill-opacity="0.46"/>
+  <ellipse cx="280" cy="148" rx="288" ry="182" fill="url(#glowA)"/>
+  <ellipse cx="1362" cy="720" rx="284" ry="178" fill="url(#glowB)"/>
+  <ellipse cx="1312" cy="166" rx="210" ry="118" fill="#FFFFFF" fill-opacity="0.44"/>
+  <ellipse cx="252" cy="806" rx="308" ry="124" fill="#FFFFFF" fill-opacity="0.36"/>
 
-  <g filter="url(#shadow)">
+  <g filter="url(#shell)">
     <rect x="76" y="64" width="1448" height="772" rx="42" fill="#FFFFFF" fill-opacity="0.42"/>
     <rect x="76.75" y="64.75" width="1446.5" height="770.5" rx="41.25" stroke="white" stroke-opacity="0.9" stroke-width="1.5"/>
   </g>
 
-  <g filter="url(#softShadow)">
-    <rect x="136" y="128" width="752" height="616" rx="34" fill="#FFFFFF" fill-opacity="0.5"/>
-    <rect x="136.75" y="128.75" width="750.5" height="614.5" rx="33.25" stroke="white" stroke-opacity="0.92" stroke-width="1.5"/>
-  </g>
-
-  <rect x="168" y="166" width="300" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.72"/>
-  <rect x="168.75" y="166.75" width="298.5" height="60.5" rx="30.25" stroke="white" stroke-opacity="0.9" stroke-width="1.5"/>
-  <text x="318" y="205" text-anchor="middle" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="22" font-weight="700">BETA CURSOR 中文完整本地化</text>
-
-  <text x="168" y="318" fill="#12151B" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="68" font-weight="800">普通用户下载补丁包</text>
-  <text x="168" y="394" fill="#12151B" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="68" font-weight="800">开发者维护源码仓库</text>
-  <text x="168" y="454" fill="#4A5360" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600">真正用于安装的是 ZIP 补丁包。维护补丁链路时再进入源码仓库。</text>
-
-  <g>
-    <rect x="168" y="500" width="242" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.96"/>
-    <rect x="168.75" y="500.75" width="240.5" height="60.5" rx="30.25" stroke="white" stroke-opacity="0.96" stroke-width="1.5"/>
-    <text x="289" y="540" text-anchor="middle" fill="#15181E" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">当前发布 v0.2.1</text>
+  <g filter="url(#glass)">
+    <rect x="138" y="132" width="798" height="608" rx="34" fill="#FFFFFF" fill-opacity="0.54"/>
+    <rect x="138.75" y="132.75" width="796.5" height="606.5" rx="33.25" stroke="white" stroke-opacity="0.92" stroke-width="1.5"/>
   </g>
 
   <g>
-    <rect x="426" y="500" width="228" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.62"/>
-    <rect x="426.75" y="500.75" width="226.5" height="60.5" rx="30.25" stroke="white" stroke-opacity="0.84" stroke-width="1.5"/>
-    <text x="540" y="540" text-anchor="middle" fill="#15181E" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">Cursor 3.1.15</text>
+    <rect x="174" y="168" width="328" height="60" rx="30" fill="#FFFFFF" fill-opacity="0.78"/>
+    <rect x="174.75" y="168.75" width="326.5" height="58.5" rx="29.25" stroke="white" stroke-opacity="0.92" stroke-width="1.5"/>
+    <text x="338" y="206" text-anchor="middle" fill="#161A21" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="22" font-weight="700">BETA CURSOR 中文完整本地化</text>
+  </g>
+
+  <text x="174" y="300" fill="#12161C" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="72" font-weight="800">给现有 Cursor</text>
+  <text x="174" y="382" fill="#12161C" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="72" font-weight="800">直接装上完整中文</text>
+  <text x="174" y="446" fill="#4D5561" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="600">下载 Release ZIP 即可安装。支持 macOS / Windows，自带回滚。</text>
+
+  <g>
+    <rect x="174" y="498" width="238" height="60" rx="30" fill="#FFFFFF" fill-opacity="0.96"/>
+    <rect x="174.75" y="498.75" width="236.5" height="58.5" rx="29.25" stroke="white" stroke-opacity="0.96" stroke-width="1.5"/>
+    <text x="293" y="536" text-anchor="middle" fill="#15181E" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">Release v0.2.1</text>
+  </g>
+  <g>
+    <rect x="426" y="498" width="224" height="60" rx="30" fill="#FFFFFF" fill-opacity="0.66"/>
+    <rect x="426.75" y="498.75" width="222.5" height="58.5" rx="29.25" stroke="white" stroke-opacity="0.88" stroke-width="1.5"/>
+    <text x="538" y="536" text-anchor="middle" fill="#15181E" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">Cursor 3.1.15</text>
+  </g>
+  <g>
+    <rect x="664" y="498" width="174" height="60" rx="30" fill="#FFFFFF" fill-opacity="0.6"/>
+    <rect x="664.75" y="498.75" width="172.5" height="58.5" rx="29.25" stroke="white" stroke-opacity="0.82" stroke-width="1.5"/>
+    <text x="751" y="536" text-anchor="middle" fill="#15181E" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">可回滚</text>
   </g>
 
   <g>
-    <rect x="670" y="500" width="194" height="62" rx="31" fill="#FFFFFF" fill-opacity="0.58"/>
-    <rect x="670.75" y="500.75" width="192.5" height="60.5" rx="30.25" stroke="white" stroke-opacity="0.8" stroke-width="1.5"/>
-    <text x="767" y="540" text-anchor="middle" fill="#15181E" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="700">可回滚</text>
+    <rect x="174" y="616" width="684" height="96" rx="28" fill="#FFFFFF" fill-opacity="0.42"/>
+    <rect x="174.75" y="616.75" width="682.5" height="94.5" rx="27.25" stroke="white" stroke-opacity="0.84" stroke-width="1.5"/>
+    <text x="206" y="670" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="28" font-weight="800">真实交付物是完整安装包，不是源码演示仓库</text>
+    <text x="206" y="704" fill="#55606D" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="22" font-weight="600">ZIP 补丁包、安装脚本、回滚链路和维护者所需的再次导出能力都在里面。</text>
   </g>
 
-  <rect x="168" y="620" width="646" height="112" rx="30" fill="#FFFFFF" fill-opacity="0.42"/>
-  <rect x="168.75" y="620.75" width="644.5" height="110.5" rx="29.25" stroke="white" stroke-opacity="0.82" stroke-width="1.5"/>
-  <text x="202" y="674" fill="#16191F" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="30" font-weight="800">完整本地补丁包</text>
-  <text x="202" y="718" fill="#4C5562" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="600">支持现有 Cursor 直接应用，保留回滚、验证与再次导出能力。</text>
-
-  <g filter="url(#panelShadow)">
-    <rect x="936" y="150" width="474" height="262" rx="32" fill="#FFFFFF" fill-opacity="0.44"/>
-    <rect x="936.75" y="150.75" width="472.5" height="260.5" rx="31.25" stroke="white" stroke-opacity="0.86" stroke-width="1.5"/>
+  <g filter="url(#panel)">
+    <rect x="970" y="162" width="444" height="254" rx="32" fill="#FFFFFF" fill-opacity="0.46"/>
+    <rect x="970.75" y="162.75" width="442.5" height="252.5" rx="31.25" stroke="white" stroke-opacity="0.9" stroke-width="1.5"/>
   </g>
-  <rect x="974" y="190" width="156" height="20" rx="10" fill="#313844" fill-opacity="0.12"/>
-
+  <rect x="1008" y="200" width="152" height="18" rx="9" fill="#313844" fill-opacity="0.12"/>
   <g>
-    <rect x="974" y="240" width="186" height="92" rx="24" fill="#3E4654" fill-opacity="0.2"/>
-    <rect x="974.75" y="240.75" width="184.5" height="90.5" rx="23.25" stroke="white" stroke-opacity="0.36" stroke-width="1.5"/>
-    <text x="1067" y="296" text-anchor="middle" fill="#FFFFFF" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="800">汉化前</text>
+    <rect x="1008" y="242" width="170" height="90" rx="24" fill="#3E4654" fill-opacity="0.18"/>
+    <rect x="1008.75" y="242.75" width="168.5" height="88.5" rx="23.25" stroke="white" stroke-opacity="0.38" stroke-width="1.5"/>
+    <text x="1093" y="297" text-anchor="middle" fill="#FFFFFF" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="800">汉化前</text>
   </g>
-
   <g>
-    <rect x="1188" y="240" width="192" height="92" rx="24" fill="#FFFFFF" fill-opacity="0.98"/>
-    <rect x="1188.75" y="240.75" width="190.5" height="90.5" rx="23.25" stroke="white" stroke-opacity="0.98" stroke-width="1.5"/>
-    <text x="1284" y="296" text-anchor="middle" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="800">汉化后</text>
+    <rect x="1198" y="242" width="184" height="90" rx="24" fill="#FFFFFF" fill-opacity="0.98"/>
+    <rect x="1198.75" y="242.75" width="182.5" height="88.5" rx="23.25" stroke="white" stroke-opacity="0.98" stroke-width="1.5"/>
+    <text x="1290" y="297" text-anchor="middle" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="800">汉化后</text>
   </g>
+  <rect x="1008" y="364" width="162" height="18" rx="9" fill="#313844" fill-opacity="0.12"/>
+  <rect x="1008" y="394" width="228" height="18" rx="9" fill="#313844" fill-opacity="0.08"/>
+  <rect x="1272" y="362" width="110" height="50" rx="18" fill="#FFFFFF" fill-opacity="0.56"/>
+  <rect x="1272.75" y="362.75" width="108.5" height="48.5" rx="17.25" stroke="white" stroke-opacity="0.72" stroke-width="1.5"/>
 
-  <rect x="974" y="368" width="172" height="18" rx="9" fill="#313844" fill-opacity="0.12"/>
-  <rect x="974" y="400" width="242" height="18" rx="9" fill="#313844" fill-opacity="0.09"/>
-  <rect x="1272" y="362" width="108" height="56" rx="18" fill="#FFFFFF" fill-opacity="0.5"/>
-  <rect x="1272.75" y="362.75" width="106.5" height="54.5" rx="17.25" stroke="white" stroke-opacity="0.68" stroke-width="1.5"/>
-
-  <g filter="url(#panelShadow)">
-    <rect x="936" y="448" width="474" height="280" rx="32" fill="#FFFFFF" fill-opacity="0.44"/>
-    <rect x="936.75" y="448.75" width="472.5" height="278.5" rx="31.25" stroke="white" stroke-opacity="0.86" stroke-width="1.5"/>
+  <g filter="url(#panel)">
+    <rect x="970" y="446" width="444" height="266" rx="32" fill="#FFFFFF" fill-opacity="0.46"/>
+    <rect x="970.75" y="446.75" width="442.5" height="264.5" rx="31.25" stroke="white" stroke-opacity="0.9" stroke-width="1.5"/>
   </g>
-
-  <rect x="974" y="488" width="168" height="20" rx="10" fill="#313844" fill-opacity="0.12"/>
-
+  <rect x="1008" y="484" width="162" height="18" rx="9" fill="#313844" fill-opacity="0.12"/>
   <g>
-    <rect x="974" y="536" width="154" height="126" rx="28" fill="#FFFFFF" fill-opacity="0.58"/>
-    <rect x="974.75" y="536.75" width="152.5" height="124.5" rx="27.25" stroke="white" stroke-opacity="0.82" stroke-width="1.5"/>
-    <text x="1051" y="611" text-anchor="middle" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="26" font-weight="800">补丁包</text>
+    <rect x="1008" y="528" width="148" height="122" rx="28" fill="#FFFFFF" fill-opacity="0.64"/>
+    <rect x="1008.75" y="528.75" width="146.5" height="120.5" rx="27.25" stroke="white" stroke-opacity="0.82" stroke-width="1.5"/>
+    <text x="1082" y="602" text-anchor="middle" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="800">Release</text>
+    <text x="1082" y="636" text-anchor="middle" fill="#171A20" font-family="SF Pro Display, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="24" font-weight="800">安装包</text>
   </g>
-
   <g>
-    <rect x="1146" y="536" width="232" height="40" rx="20" fill="#FFFFFF" fill-opacity="0.94"/>
-    <rect x="1146.75" y="536.75" width="230.5" height="38.5" rx="19.25" stroke="white" stroke-opacity="0.96" stroke-width="1.5"/>
-    <text x="1262" y="562" text-anchor="middle" fill="#171A20" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="17" font-weight="700">macOS / Windows 安装脚本</text>
+    <rect x="1180" y="528" width="198" height="38" rx="19" fill="#FFFFFF" fill-opacity="0.96"/>
+    <rect x="1180.75" y="528.75" width="196.5" height="36.5" rx="18.25" stroke="white" stroke-opacity="0.98" stroke-width="1.5"/>
+    <text x="1279" y="552" text-anchor="middle" fill="#171A20" font-family="SF Pro Text, PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="18" font-weight="700">macOS / Windows</text>
   </g>
-
-  <rect x="1146" y="598" width="190" height="20" rx="10" fill="#313844" fill-opacity="0.12"/>
-  <rect x="1146" y="630" width="238" height="20" rx="10" fill="#313844" fill-opacity="0.09"/>
-  <rect x="1146" y="662" width="180" height="20" rx="10" fill="#313844" fill-opacity="0.07"/>
+  <rect x="1180" y="592" width="182" height="18" rx="9" fill="#313844" fill-opacity="0.12"/>
+  <rect x="1180" y="622" width="218" height="18" rx="9" fill="#313844" fill-opacity="0.08"/>
+  <rect x="1180" y="652" width="168" height="18" rx="9" fill="#313844" fill-opacity="0.07"/>
 </svg>
