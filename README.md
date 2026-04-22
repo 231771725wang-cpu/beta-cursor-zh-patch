@@ -21,7 +21,7 @@
 如果你要的不是“看个思路”，而是“真装上去、还能回滚、还能继续维护”，这就是那套交付物。
 
 **下载发布页：** [v0.2.2](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2)  
-**直接下载 ZIP：** [Beta-Cursor-全面汉化-3.1.17-fce1e9ab.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.2/Beta-Cursor-%E5%85%A8%E9%9D%A2%E6%B1%89%E5%8C%96-3.1.17-fce1e9ab.zip)  
+**直接下载 ZIP：** [Beta-Cursor-.-3.1.17-fce1e9ab.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.2/Beta-Cursor-.-3.1.17-fce1e9ab.zip)  
 **英文说明：** [README.en.md](README.en.md)
 
 ## 预览

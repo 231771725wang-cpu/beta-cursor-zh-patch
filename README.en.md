@@ -21,7 +21,7 @@ The source repository is for maintainers who need to continue `scan / build / qa
 If what you want is not a demo but a shippable local patch with rollback still within reach, this is the package.
 
 **Release page:** [v0.2.2](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/tag/v0.2.2)  
-**Direct ZIP:** [Beta-Cursor-全面汉化-3.1.17-fce1e9ab.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.2/Beta-Cursor-%E5%85%A8%E9%9D%A2%E6%B1%89%E5%8C%96-3.1.17-fce1e9ab.zip)
+**Direct ZIP:** [Beta-Cursor-.-3.1.17-fce1e9ab.zip](https://github.com/231771725wang-cpu/beta-cursor-zh-patch/releases/download/v0.2.2/Beta-Cursor-.-3.1.17-fce1e9ab.zip)
 
 ## Preview
 
