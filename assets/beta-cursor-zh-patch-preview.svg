@@ -2,29 +2,29 @@
   <rect width="1600" height="900" rx="40" fill="#0E1014"/>
   <rect x="60" y="48" width="1480" height="804" rx="32" fill="#12161D" stroke="#232B37" stroke-width="2"/>
   <rect x="110" y="96" width="266" height="54" rx="27" fill="#171D27" stroke="#2B3340" stroke-width="2"/>
-  <text x="141" y="131" fill="#F2F4F8" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">BETA CURSOR ZH PATCH</text>
-  <text x="110" y="234" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">Release bundle for users.</text>
-  <text x="110" y="312" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">Source repo for maintainers.</text>
-  <text x="110" y="370" fill="#9FA9B8" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="500">Install from the real ZIP. Rebuild only when you maintain the patch chain.</text>
+  <text x="141" y="131" fill="#F2F4F8" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">BETA CURSOR 中文完整本地化</text>
+  <text x="110" y="234" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="800">普通用户下载补丁包</text>
+  <text x="110" y="306" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="800">开发者维护源码仓库</text>
+  <text x="110" y="364" fill="#9FA9B8" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="500">安装请认准真正的 ZIP 补丁包。只有维护补丁链路时才进入源码仓库。</text>
 
   <rect x="110" y="418" width="212" height="54" rx="27" fill="#F3F4F6"/>
-  <text x="153" y="452" fill="#131722" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Release v0.2.1</text>
+  <text x="153" y="452" fill="#131722" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">当前发布 v0.2.1</text>
   <rect x="340" y="418" width="222" height="54" rx="27" fill="#202735" stroke="#313B4E" stroke-width="2"/>
   <text x="379" y="452" fill="#D8DEE8" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Cursor 3.1.15</text>
   <rect x="580" y="418" width="190" height="54" rx="27" fill="#202735" stroke="#313B4E" stroke-width="2"/>
-  <text x="623" y="452" fill="#D8DEE8" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">Rollback</text>
+  <text x="647" y="452" fill="#D8DEE8" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">可回滚</text>
 
   <rect x="110" y="580" width="700" height="140" rx="28" fill="#0F141D" stroke="#232B37" stroke-width="2"/>
-  <text x="148" y="628" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800">What the GitHub page should make obvious</text>
-  <text x="148" y="674" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">1. End users download the bundle, not the source zip.</text>
-  <text x="148" y="708" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">2. The repo is for scan / build / verify / export / rollback.</text>
+  <text x="148" y="628" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800">GitHub 首页应该第一眼讲清楚</text>
+  <text x="148" y="674" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">1. 普通用户下载补丁包，不要下载源码压缩包。</text>
+  <text x="148" y="708" fill="#A8B2C1" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600">2. 这个仓库是给 scan / build / verify / export / rollback 用的。</text>
 
   <rect x="930" y="118" width="500" height="286" rx="28" fill="#0F141D" stroke="#232B37" stroke-width="2"/>
   <rect x="968" y="156" width="148" height="18" rx="9" fill="#ADB9C8" fill-opacity="0.28"/>
   <rect x="968" y="200" width="188" height="80" rx="20" fill="#232C38"/>
-  <text x="1006" y="248" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">Before</text>
+  <text x="1006" y="248" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">汉化前</text>
   <rect x="1184" y="200" width="208" height="80" rx="20" fill="#F3F4F6"/>
-  <text x="1233" y="248" fill="#131722" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">After</text>
+  <text x="1245" y="248" fill="#131722" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">汉化后</text>
   <rect x="968" y="314" width="180" height="16" rx="8" fill="#ADB9C8" fill-opacity="0.22"/>
   <rect x="968" y="344" width="240" height="16" rx="8" fill="#ADB9C8" fill-opacity="0.16"/>
   <rect x="1248" y="314" width="144" height="52" rx="16" fill="#6C7CFF" fill-opacity="0.14"/>
@@ -32,9 +32,9 @@
   <rect x="930" y="438" width="500" height="282" rx="28" fill="#0F141D" stroke="#232B37" stroke-width="2"/>
   <rect x="968" y="476" width="170" height="18" rx="9" fill="#ADB9C8" fill-opacity="0.28"/>
   <rect x="968" y="520" width="144" height="120" rx="22" fill="#1A2230"/>
-  <text x="1005" y="592" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">ZIP</text>
+  <text x="1005" y="592" fill="#F5F7FA" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">补丁包</text>
   <rect x="1136" y="520" width="236" height="30" rx="15" fill="#F3F4F6"/>
-  <text x="1165" y="541" fill="#161B24" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">macOS / Windows scripts</text>
+  <text x="1160" y="541" fill="#161B24" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">macOS / Windows 安装脚本</text>
   <rect x="1136" y="568" width="220" height="18" rx="9" fill="#ADB9C8" fill-opacity="0.22"/>
   <rect x="1136" y="600" width="252" height="18" rx="9" fill="#ADB9C8" fill-opacity="0.16"/>
   <rect x="1136" y="632" width="180" height="18" rx="9" fill="#ADB9C8" fill-opacity="0.14"/>
