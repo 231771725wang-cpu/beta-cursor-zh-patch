@@ -949,6 +949,123 @@ class CursorZhTests(unittest.TestCase):
             self.assertIn('label:"深色"', workbench_content)
             self.assertIn('label:"高对比度"', workbench_content)
 
+    def test_build_and_apply_translates_model_api_key_settings_strings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+            workbench = app / "out" / "vs" / "workbench" / "workbench.desktop.main.js"
+            workbench.parent.mkdir(parents=True, exist_ok=True)
+            workbench.write_text(
+                'const a="API Keys";\n'
+                'const b="View All Models";\n'
+                'const c="Add Custom Model";\n'
+                'const d="Add or search model";\n'
+                'const e="No models available";\n'
+                'const f=["You can put in","your OpenAI key","to use OpenAI models at cost."];\n'
+                'const g={title:"OpenAI API Key",placeholder:"Enter your OpenAI API Key"};\n'
+                'const h={label:"Override OpenAI Base URL",description:"Change the base URL for OpenAI API requests."};\n'
+                'const i=["You can put in","your Anthropic key",\'to use Claude at cost. When enabled, this key will be used for all models beginning with "claude-".\'];\n'
+                'const j={title:"Anthropic API Key",placeholder:"Enter your Anthropic API Key"};\n'
+                'const k=["You can put in","your Google AI Studio key","to use Google models at-cost."];\n'
+                'const l={title:"Google API Key",placeholder:"Enter your Google AI Studio API Key"};\n'
+                'const m={title:"Azure OpenAI",description:"Configure Azure OpenAI to use OpenAI models through your Azure account.",label1:"Base URL",label2:"Deployment Name",label3:"API Key",placeholder:"Enter your Azure OpenAI API Key"};\n'
+                'const n={title:"AWS Bedrock",description1:"Configure AWS Bedrock to use Anthropic Claude models through your AWS account.",description2:"Cursor Enterprise teams can configure IAM roles to access Bedrock without any Access Keys.",label1:"Access Key ID",placeholder1:"AWS Access Key ID",label2:"Secret Access Key",placeholder2:"AWS Secret Access Key",label3:"Region"};\n',
+                encoding="utf-8",
+            )
+            (app / "out" / "nls.messages.json").write_text("[]", encoding="utf-8")
+            (app / "product.json").write_text(json.dumps({"checksums": {}}) + "\n", encoding="utf-8")
+            (app / "package.json").write_text('{"version":"3.0.12"}\n', encoding="utf-8")
+
+            report = run_scan(
+                CursorContext(
+                    app_path=app,
+                    package_path=app / "package.json",
+                    product_path=app / "product.json",
+                    version="3.0.12",
+                    commit="a80ff7df",
+                    lang_pack_path=None,
+                )
+            )
+
+            manifest = run_build(report)
+            result = apply_manifest(manifest, backup_root=root / "backup", force=False)
+            self.assertGreaterEqual(result["changed_files_count"], 1)
+
+            workbench_content = read_text(workbench)
+            self.assertIn('"API 密钥"', workbench_content)
+            self.assertIn('"查看全部模型"', workbench_content)
+            self.assertIn('"添加自定义模型"', workbench_content)
+            self.assertIn('"添加或搜索模型"', workbench_content)
+            self.assertIn('"没有可用模型"', workbench_content)
+            self.assertIn('"OpenAI API 密钥"', workbench_content)
+            self.assertIn('"OpenAI 密钥"', workbench_content)
+            self.assertIn('"来按量付费使用 OpenAI 模型。"', workbench_content)
+            self.assertIn('"输入你的 OpenAI API 密钥"', workbench_content)
+            self.assertIn('"覆盖 OpenAI 基础 URL"', workbench_content)
+            self.assertIn('"修改 OpenAI API 请求的基础 URL。"', workbench_content)
+            self.assertIn('"Anthropic API 密钥"', workbench_content)
+            self.assertIn('"Anthropic 密钥"', workbench_content)
+            self.assertIn("来按量付费使用 Claude。启用后，此密钥将用于所有以“claude-”开头的模型。", workbench_content)
+            self.assertIn('"输入你的 Anthropic API 密钥"', workbench_content)
+            self.assertIn('"Google API 密钥"', workbench_content)
+            self.assertIn('"Google AI Studio 密钥"', workbench_content)
+            self.assertIn('"来按量付费使用 Google 模型。"', workbench_content)
+            self.assertIn('"输入你的 Google AI Studio API 密钥"', workbench_content)
+            self.assertIn('"通过你的 Azure 账户配置 Azure OpenAI，以使用 OpenAI 模型。"', workbench_content)
+            self.assertIn('"基础 URL"', workbench_content)
+            self.assertIn('"部署名称"', workbench_content)
+            self.assertIn('"API 密钥"', workbench_content)
+            self.assertIn('"输入你的 Azure OpenAI API 密钥"', workbench_content)
+            self.assertIn('"通过你的 AWS 账户配置 AWS Bedrock，以使用 Anthropic Claude 模型。"', workbench_content)
+            self.assertIn('"Cursor Enterprise 团队可配置 IAM 角色，无需任何访问密钥即可访问 Bedrock。"', workbench_content)
+            self.assertIn('"访问密钥 ID"', workbench_content)
+            self.assertIn('"AWS 访问密钥 ID"', workbench_content)
+            self.assertIn('"秘密访问密钥"', workbench_content)
+            self.assertIn('"AWS 秘密访问密钥"', workbench_content)
+            self.assertIn('label3:"区域"', workbench_content)
+
+    def test_build_and_apply_translates_model_picker_descriptions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            app = root / "Cursor.app" / "Contents" / "Resources" / "app"
+            workbench = app / "out" / "vs" / "workbench" / "workbench.desktop.main.js"
+            workbench.parent.mkdir(parents=True, exist_ok=True)
+            workbench.write_text(
+                'const a="Cursor\'s fastest model, optimized for editing.";\n'
+                'const b="Anthropic\'s most powerful model, great for difficult tasks.";\n'
+                'const c="Anthropic\'s previous most powerful model, for difficult tasks.";\n'
+                'const d="Google\'s flagship model, excelling at complex tasks.";\n'
+                'const e="Version: high effort";\n'
+                'const f="1M context window";\n',
+                encoding="utf-8",
+            )
+            (app / "out" / "nls.messages.json").write_text("[]", encoding="utf-8")
+            (app / "product.json").write_text(json.dumps({"checksums": {}}) + "\n", encoding="utf-8")
+            (app / "package.json").write_text('{"version":"3.1.17"}\n', encoding="utf-8")
+
+            report = run_scan(
+                CursorContext(
+                    app_path=app,
+                    package_path=app / "package.json",
+                    product_path=app / "product.json",
+                    version="3.1.17",
+                    commit="d5c0e77a",
+                    lang_pack_path=None,
+                )
+            )
+
+            manifest = run_build(report)
+            result = apply_manifest(manifest, backup_root=root / "backup", force=False)
+            self.assertGreaterEqual(result["changed_files_count"], 1)
+
+            workbench_content = read_text(workbench)
+            self.assertIn('"Cursor 速度最快的模型，针对编辑任务优化。"', workbench_content)
+            self.assertIn('"Anthropic 最强模型，适合高难度任务。"', workbench_content)
+            self.assertIn('"Anthropic 上一代最强模型，适合高难度任务。"', workbench_content)
+            self.assertIn('"Google 旗舰模型，擅长复杂任务。"', workbench_content)
+            self.assertIn('"版本：高强度"', workbench_content)
+            self.assertIn('"1M 上下文窗口"', workbench_content)
+
     def test_scan_reports_dynamic_candidates(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -1017,7 +1134,36 @@ class CursorZhTests(unittest.TestCase):
             result = apply_manifest(manifest, backup_root=backup_root, force=False, enable_dynamic_market=True)
             self.assertEqual(result["changed_files_count"], 1)
             self.assertTrue(result["dynamic_market_patch"]["applied"])
-            self.assertIn("CURSOR_ZH_DYNAMIC_MARKET_BEGIN", read_text(workbench))
+            workbench_content = read_text(workbench)
+            self.assertIn("CURSOR_ZH_DYNAMIC_MARKET_BEGIN", workbench_content)
+            self.assertIn("Anthropic's most powerful model, great for difficult tasks.", workbench_content)
+            self.assertIn("Anthropic 最强模型，适合高难度任务。", workbench_content)
+            self.assertIn("Cursor's fastest model, optimized for editing.", workbench_content)
+            self.assertIn("Cursor 速度最快的模型，针对编辑任务优化。", workbench_content)
+            self.assertIn("Cursor's latest agentic coding model.", workbench_content)
+            self.assertIn("Cursor 最新的智能体编程模型。", workbench_content)
+            self.assertIn("Uses models that balance intelligence and cost efficiency. Useful for everyday tasks.", workbench_content)
+            self.assertIn("使用在智能与成本效率之间取得平衡的模型，适合日常任务。", workbench_content)
+            self.assertIn("OpenAI's latest flagship model. Great for complex tasks.", workbench_content)
+            self.assertIn("OpenAI 最新旗舰模型，适合复杂任务。", workbench_content)
+            self.assertIn("Anthropic's smartest model, great for difficult tasks.", workbench_content)
+            self.assertIn("Anthropic 最聪明的模型，适合高难度任务。", workbench_content)
+            self.assertIn("Anthropic's earlier flagship model, great for difficult tasks.", workbench_content)
+            self.assertIn("Anthropic 较早一代旗舰模型，适合高难度任务。", workbench_content)
+            self.assertIn("Google's latest flagship model, great for daily use.", workbench_content)
+            self.assertIn("Google 最新旗舰模型，适合日常使用。", workbench_content)
+            self.assertIn("Premium Intelligence", workbench_content)
+            self.assertIn("高级智能", workbench_content)
+            self.assertIn("Uses the most capable models available. Recommended for complex tasks.", workbench_content)
+            self.assertIn("使用当前可用能力最强的模型，适合复杂任务。", workbench_content)
+            self.assertIn("Billed at the model's API price.", workbench_content)
+            self.assertIn("按模型 API 价格计费。", workbench_content)
+            self.assertIn("Version: preview", workbench_content)
+            self.assertIn("版本：预览版", workbench_content)
+            self.assertIn("Fast Mode is expensive", workbench_content)
+            self.assertIn("快速模式价格较高", workbench_content)
+            self.assertIn("markdownContent", workbench_content)
+            self.assertIn("body", workbench_content)
 
             rollback_result = run_rollback(result)
             self.assertEqual(rollback_result["restored_files_count"], 1)
@@ -1066,6 +1212,8 @@ class CursorZhTests(unittest.TestCase):
             content = read_text(workbench)
             self.assertNotIn("old block", content)
             self.assertIn("MARKET_URL_SIGNS", content)
+            self.assertIn("markdownContent", content)
+            self.assertIn("secondaryText", content)
 
     def test_apply_patches_integrity_without_dynamic_market(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
